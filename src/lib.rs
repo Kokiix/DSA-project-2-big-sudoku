@@ -3,7 +3,7 @@ mod tests;
 
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::solve_matrix::SolvingMatrix;
+use crate::solve_matrix::{SolvingMatrix, SquareNumber};
 
 // TODO: implement methods here so that JS doesn't have to extract?
 #[wasm_bindgen]
@@ -13,7 +13,12 @@ pub struct FinalSudokuBoard {
 }
 
 #[wasm_bindgen]
-pub fn generate_sudoku(grid_size: usize) -> FinalSudokuBoard {
-    let mut matrix = SolvingMatrix::new(grid_size);
-    return FinalSudokuBoard { init_grid: vec![], solved_grid: vec![] };
+pub fn generate_sudoku(input_sudoku_size: u16) -> Option<FinalSudokuBoard> {
+    if let Some(valid_sudoku_size) = SquareNumber::from(input_sudoku_size) {
+        let mut matrix = SolvingMatrix::new(valid_sudoku_size);
+        // SOLVE HERE
+        Some(FinalSudokuBoard { init_grid: vec![], solved_grid: vec![] })
+    } else {
+        None
+    }
 }
