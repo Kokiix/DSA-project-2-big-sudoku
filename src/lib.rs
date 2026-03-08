@@ -14,11 +14,8 @@ pub struct FinalSudokuBoard {
 
 #[wasm_bindgen]
 pub fn generate_sudoku(input_sudoku_size: u16) -> Option<FinalSudokuBoard> {
-    if let Some(valid_sudoku_size) = SquareNumber::from(input_sudoku_size) {
-        let mut matrix = SolvingMatrix::new(valid_sudoku_size);
-        // SOLVE HERE
-        Some(FinalSudokuBoard { init_grid: vec![], solved_grid: vec![] })
-    } else {
-        None
-    }
+    let valid_sudoku_size: SquareNumber = input_sudoku_size.try_into().ok()?;
+    let mut matrix = SolvingMatrix::new(valid_sudoku_size);
+    // SOLVE HERE
+    Some(FinalSudokuBoard { init_grid: vec![], solved_grid: vec![] })
 }

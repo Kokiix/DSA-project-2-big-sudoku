@@ -13,10 +13,11 @@ impl SolvingMatrix {
 }
 
 pub struct SquareNumber {value: usize}
-impl SquareNumber {
-    pub fn from(n: u16) -> Option<Self> {
+impl TryFrom<u16> for SquareNumber {
+    type Error = ();
+    fn try_from(n: u16) -> Result<Self, Self::Error> {
         if n.isqrt().pow(2) == n  {
-            Some(SquareNumber { value: n as usize })
-        } else {None}
+            Ok(SquareNumber { value: n as usize })
+        } else {Err(())}
     }
 }
