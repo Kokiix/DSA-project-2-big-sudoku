@@ -10,7 +10,7 @@ struct Node {
 }
 
 impl Node {
-    fn insert_vertical(pos: u32, col_obj: u32, matrix: &mut Vec<Node>) -> Self {
+    fn create_connected(matrix: &mut Vec<Node>, pos: u32, col_obj: u32) -> Self {
         let bot_col_node = matrix[col_obj as usize].up;
         matrix[bot_col_node as usize].down = pos;
         matrix[col_obj as usize].up = pos;
@@ -18,10 +18,20 @@ impl Node {
             column_obj: col_obj,
             up: bot_col_node,
             down: col_obj,
-            right: pos,
-            left: pos,
+            right: pos + 1,
+            left: pos - 1,
             column_size: None,
         }
+    }
+
+    fn insert_row(matrix: &mut Vec<Node>, starting_pos: u32, col_positions: &[u32]) {
+        for (i, col_pos) in col_positions.iter().enumerate() {
+            let n = Node::create_connected(matrix, starting_pos + i as u32, *col_pos);
+            matrix.push(n);
+        }
+
+        matrix[starting_pos as usize].left = starting_pos + 3;
+        matrix[starting_pos as usize + 3].right = starting_pos;
     }
 }
 
@@ -50,7 +60,10 @@ impl SolvingMatrix {
         row = n^2
         col = 2n^2
         subgrid = 3n^2
-        root = 4n^2 */
+        root = 4n^2
+
+        within each subsection, entries go from 1 to n in the first position, then the 2nd, etc
+        */
         let root_idx = 4 * n2;
         // first col obj, linked to root
         matrix.push(Node {
@@ -83,12 +96,19 @@ impl SolvingMatrix {
 
         // initialize matrix nodes
         let mut new_node_pos = root_idx + 1;
-        for grid_value in 1..=n {
+        for grid_value in 0..n {
             for grid_position in 0..n2 {
-                let existence = Node::insert_vertical(new_node_pos, grid_position, &mut matrix);
-                let row = Node::insert_vertical(new_node_pos + 1, n2 + grid_position, &mut matrix);
-                let col = Node::insert_vertical(new_node_pos + 2, grid_position, &mut matrix);
-                let subgrid = Node::insert_vertical(new_node_pos + 3, grid_position, &mut matrix);
+                Node::insert_row(
+                    &mut matrix,
+                    new_node_pos,
+                    &[
+                        // pointers to the column objects corresponding to each item in the row
+                        grid_position,                           // existence
+                        n2 + grid_position / n + grid_value,     // row
+                        2 * n2 + grid_position % n + grid_value, // col
+                        3 * n2 + grid_position / n + grid_value, // subgrid
+                    ],
+                );
                 new_node_pos += 4;
             }
         }
