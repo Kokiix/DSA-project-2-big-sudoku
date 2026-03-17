@@ -1,12 +1,28 @@
 // TODO: prove these statements with math
 // u16 is too small; max square sudoku size is ~144
-pub struct Node {
+struct Node {
     column_obj: u32,
     up: u32,
     down: u32,
     right: u32,
     left: u32,
     column_size: Option<u32>,
+}
+
+impl Node {
+    fn insert_vertical(pos: u32, col_obj: u32, matrix: &mut Vec<Node>) -> Self {
+        let bot_col_node = matrix[col_obj as usize].up;
+        matrix[bot_col_node as usize].down = pos;
+        matrix[col_obj as usize].up = pos;
+        Node {
+            column_obj: col_obj,
+            up: bot_col_node,
+            down: col_obj,
+            right: pos,
+            left: pos,
+            column_size: None,
+        }
+    }
 }
 
 pub struct SolvingMatrix {
@@ -36,6 +52,7 @@ impl SolvingMatrix {
         subgrid = 3n^2
         root = 4n^2 */
         let root_idx = 4 * n2;
+        // first col obj, linked to root
         matrix.push(Node {
             column_obj: 0,
             up: 0,
@@ -54,6 +71,7 @@ impl SolvingMatrix {
                 column_size: Some(0),
             });
         }
+        // root col obj
         matrix.push(Node {
             column_obj: root_idx,
             up: root_idx,
@@ -64,9 +82,14 @@ impl SolvingMatrix {
         });
 
         // initialize matrix nodes
+        let mut new_node_pos = root_idx + 1;
         for grid_value in 1..=n {
             for grid_position in 0..n2 {
-                let existence = Node {};
+                let existence = Node::insert_vertical(new_node_pos, grid_position, &mut matrix);
+                let row = Node::insert_vertical(new_node_pos + 1, n2 + grid_position, &mut matrix);
+                let col = Node::insert_vertical(new_node_pos + 2, grid_position, &mut matrix);
+                let subgrid = Node::insert_vertical(new_node_pos + 3, grid_position, &mut matrix);
+                new_node_pos += 4;
             }
         }
         return matrix;
@@ -76,9 +99,9 @@ impl SolvingMatrix {
 pub struct SquareNumber {
     value: usize,
 }
-impl TryFrom<u8> for SquareNumber {
+impl TryFrom<usize> for SquareNumber {
     type Error = ();
-    fn try_from(n: u8) -> Result<Self, Self::Error> {
+    fn try_from(n: usize) -> Result<Self, Self::Error> {
         if n.isqrt().pow(2) == n {
             Ok(SquareNumber { value: n as usize })
         } else {
