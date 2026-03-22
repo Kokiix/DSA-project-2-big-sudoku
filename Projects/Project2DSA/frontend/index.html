@@ -7,8 +7,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+<!-- Fonts -->
+<!-- https://developers.google.com/fonts/docs/getting_started -->
 
 
+<!-- https://www.w3schools.com/html/html_classes.asp -->
+<!-- https://www.w3schools.com/tags/tag_button.asp -->
+<!-- https://www.w3schools.com/tags/default.asp -->
 </head>
 <body>
 
@@ -20,11 +25,25 @@
         <p class="subtitle">Solving Sodoku with the Dancing Links Algorithm (DLX)</p>
     </header>
 
-    <!-- Generate Button -->
-    <section class ="generate">
-        <button class = "btn btn-primary" id ="generateRandBtn">Generate a Random Sodoku Puzzle</button>
+    <!-- Size Selector -->
+    <section class ="controls">
+        <label class = "select-label" for = "sizeSelect">Sodoku Size</label>
+        <select id = "sizeSelect">
+            <option value="0" selected>None</option>
+            <option value="4">4 x 4</option>
+            <option value="9">9 x 9</option>
+            <option value="16">16 x 16</option>
+            <option value="25">25 x 25</option>
+            <option value="36">36 x 36</option>
+            <option value="49">49 x 49</option>
+            <option value="64">64 x 64</option>
+            <option value="81">81 x 81</option>
+            <option value="100">100 x 100</option>
+            <option value="121">121 x 121</option>
+            <option value="144">144 x 144</option>
+            <option value="169">169 x 169</option>
+        </select>
     </section>
-
     <!-- Control Buttons -->
     <section class="controls">
         <button class="btn btn-primary" id ="runDlxBtn">Run DLX</button>
@@ -33,6 +52,9 @@
     </section>
     <!-- Count Label -->
     <label id="countLbl"></label>
+    
+
+    <!-- Expand Bar -->
     <section class = "expand_bar">
         <button class="btn-secondary" id ="expandBtn">Expand All</button>
     </section>
