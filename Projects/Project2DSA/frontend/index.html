@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DSA Project</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+
+</head>
+<body>
+
+  <div class="container">
+
+    <!-- Header -->
+    <header>
+        <h1 class="title">Really Big Sodoku Solver</h1>
+        <p class="subtitle">Solving Sodoku with the Dancing Links Algorithm (DLX)</p>
+    </header>
+
+    <!-- Generate Button -->
+    <section class ="generate">
+        <button class = "btn btn-primary" id ="generateRandBtn">Generate a Random Sodoku Puzzle</button>
+    </section>
+
+    <!-- Control Buttons -->
+    <section class="controls">
+        <button class="btn btn-primary" id ="runDlxBtn">Run DLX</button>
+        <button class = "btn btn-primary" id ="runBruteBtn">Run Brute Force</button>
+        <button class="btn btn-secondary" id ="resetBtn">Reset</button>
+    </section>
+    <!-- Count Label -->
+    <label id="countLbl"></label>
+    <section class = "expand_bar">
+        <button class="btn-secondary" id ="expandBtn">Expand All</button>
+    </section>
+   
+    <!-- Output Display -->
+
+    <section class="output-box" id ="output">
+        <p class="placeholder">Nothing here yet...</p>
+    </section>
+
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

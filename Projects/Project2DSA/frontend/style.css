@@ -1,0 +1,149 @@
+:root {
+    --bg: #171c29;
+    --surface: #1a1d27;
+    --border: #2e3244;
+    --accent: #1544ab;
+    --accent-hover: #0c1d46;
+    --text: #e8e8f0;
+    --text-muted: #6b7091;
+    --font-display: 'Space Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+}
+
+/*  Reset   */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/*  Base    */
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*  Layout    */
+.container {
+    width: 100%;
+    max-width: 720px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+}
+
+/*  Header    */
+header {
+    text-align: center;
+}
+
+.title {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    color: var(--text);
+    letter-spacing: -1px;
+}
+
+.subtitle {
+    margin-top: 0.5rem;
+    color: var(--text-muted);
+    font-weight: 300;
+    font-size: 1rem;
+}
+
+/*  Buttons   */
+.controls {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.btn {
+    padding: 0.7rem 1.75rem;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.btn:active {
+    transform: scale(0.9);
+}
+
+.btn-primary {
+    background-color: var(--accent);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-hover);
+}
+
+.btn-secondary {
+    background-color: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    color: var(--text);
+    border-color: var(--text-muted);
+}
+
+/*  Expand button   */
+.expand_bar{
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+}
+
+#expandBtn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: none;
+}
+
+#expandBtn:hover {
+    text-decoration: underline; 
+    color: var(--text);
+}
+
+/*  Count Label  */
+#countLbl{
+    height: 1.5rem;
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 1rem;
+}
+
+/*  Output Box    */
+.output-box {
+    width: 100%;
+    min-height: 200px;
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.5rem;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    line-height: 1.7;
+}
+
+.placeholder {
+    color: var(--text-muted);
+    text-align: center;
+    margin-top: 4rem;
+}
