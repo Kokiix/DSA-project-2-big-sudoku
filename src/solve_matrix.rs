@@ -40,11 +40,12 @@ pub struct Solver {
     solution: Vec<usize>,
     n: u32,
     n2: u32,
+    root: usize,
 }
 
 impl Solver {
     pub fn solve(n: u32) -> Vec<usize> {
-        let mut s = Solver::init_grid(n);
+        let mut s = Self::init_grid(n);
         s.explore_min_col();
         s.solution
     }
@@ -68,9 +69,12 @@ impl Solver {
             }
             while row_idx != col_idx {
                 self.solution.push(row_idx);
+                self.cover(row_idx)
             }
         }
     }
+
+    fn cover(col_idx: u32) {}
 
     // n must be a square number
     fn init_grid(n: u32) -> Self {
@@ -137,6 +141,14 @@ impl Solver {
                 new_node_pos += 4;
             }
         }
-        Solver { matrix, n, n2 }
+
+        let solution: Vec<usize> = Vec::with_capacity(n2 as usize);
+        Solver {
+            matrix,
+            solution,
+            n,
+            n2,
+            root: root_idx as usize,
+        }
     }
 }
