@@ -56,14 +56,21 @@ impl Solver {
     // false = fail on this recursive branch, true = matrix solved
     fn explore_min_col(&mut self) -> bool {
         let root = self.root;
+        // check if solved already
+        if self.matrix[root].right == root as u32 {
+            return true;
+        }
         // get col w least elements
         let mut col_idx: usize = self.matrix[root].right as usize;
+        let mut col_traverse = col_idx;
         let mut min_size = u32::MAX;
-        while col_idx != root {
-            min_size = std::cmp::min(self.matrix[col_idx].column_size.unwrap(), min_size);
-            col_idx = self.matrix[col_idx].right as usize;
+        while col_traverse != root {
+            if self.matrix[col_traverse].column_size.unwrap() < min_size {
+                col_idx = col_traverse;
+                min_size = self.matrix[col_idx].column_size.unwrap();
+            }
+            col_traverse = self.matrix[col_traverse].right as usize;
         }
-        col_idx = min_size as usize;
 
         let col_node = self.matrix[col_idx].clone();
         let mut row_item: usize = col_node.down as usize;
@@ -82,16 +89,15 @@ impl Solver {
                 self.cover_col(self.matrix[row_subitem].column_obj);
                 row_subitem = self.matrix[row_subitem].right as usize;
             }
-            // if the cover worked then solution is found
-            if self.matrix[root].right == root as u32 {
-                return true;
-            }
-            // else keep exploring
+
+            // continue exploring
             if self.explore_min_col() {
+                // leave primary column unlinked still
                 return true;
             }
             // else else uncover
             self.solution.pop();
+            // make sure to go in reverse order
             row_subitem = self.matrix[row_subitem].left as usize;
             while row_subitem != row_item {
                 self.uncover_col(self.matrix[row_subitem].column_obj);
