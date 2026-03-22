@@ -1,5 +1,8 @@
+use std::u32;
+
 // TODO: prove these statements with math
 // u16 is too small; max square sudoku size is ~144
+#[derive(Clone)]
 pub struct Node {
     pub column_obj: u32,
     pub up: u32,
@@ -50,31 +53,62 @@ impl Solver {
         s.solution
     }
 
-    fn explore_min_col(&mut self) {
-        let root = 4 * self.n2 as usize;
-        let matrix = &self.matrix;
-
-        while self.matrix[root].right != root as u32 {
-            // get col w least elements
-            let mut col_idx: usize = matrix[root].right as usize;
-            let mut min_size = 0;
-            while col_idx != root {
-                min_size = std::cmp::min(matrix[col_idx].column_size.unwrap(), min_size);
-                col_idx = matrix[col_idx].right as usize;
-            }
-
-            let mut row_idx: usize = matrix[col_idx].down as usize;
-            if row_idx == col_idx {
-                return;
-            }
-            while row_idx != col_idx {
-                self.solution.push(row_idx);
-                self.cover(row_idx)
-            }
+    // false = fail on this recursive branch, true = matrix solved
+    fn explore_min_col(&mut self) -> bool {
+        let root = self.root;
+        // get col w least elements
+        let mut col_idx: usize = self.matrix[root].right as usize;
+        let mut min_size = u32::MAX;
+        while col_idx != root {
+            min_size = std::cmp::min(self.matrix[col_idx].column_size.unwrap(), min_size);
+            col_idx = self.matrix[col_idx].right as usize;
         }
+        col_idx = min_size as usize;
+
+        let col_node = self.matrix[col_idx].clone();
+        let mut row_item: usize = col_node.down as usize;
+        if row_item == col_idx {
+            return false;
+        }
+
+        self.matrix[col_node.left as usize].right = col_node.right;
+        self.matrix[col_node.right as usize].left = col_node.left;
+        // try out each row in col
+        while row_item != col_idx {
+            // cover stuff
+            self.solution.push(row_item);
+            let mut row_subitem: usize = self.matrix[row_item].right as usize;
+            while row_subitem != row_item {
+                self.cover_col(self.matrix[row_subitem].column_obj);
+                row_subitem = self.matrix[row_subitem].right as usize;
+            }
+            // if the cover worked then solution is found
+            if self.matrix[root].right == root as u32 {
+                return true;
+            }
+            // else keep exploring
+            if self.explore_min_col() {
+                return true;
+            }
+            // else else uncover
+            self.solution.pop();
+            row_subitem = self.matrix[row_subitem].left as usize;
+            while row_subitem != row_item {
+                self.uncover_col(self.matrix[row_subitem].column_obj);
+                row_subitem = self.matrix[row_subitem].left as usize;
+            }
+
+            row_item = self.matrix[row_item].down as usize;
+        }
+
+        self.matrix[col_node.left as usize].right = col_idx as u32;
+        self.matrix[col_node.right as usize].left = col_idx as u32;
+
+        return false;
     }
 
-    fn cover(col_idx: u32) {}
+    fn cover_col(&mut self, col_idx: u32) {}
+    fn uncover_col(&mut self, col_idx: u32) {}
 
     // n must be a square number
     fn init_grid(n: u32) -> Self {
