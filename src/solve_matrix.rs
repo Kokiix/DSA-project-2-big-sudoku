@@ -86,7 +86,7 @@ impl Solver {
             self.solution.push(row_item);
             let mut row_subitem: usize = self.matrix[row_item].right as usize;
             while row_subitem != row_item {
-                self.cover_col(self.matrix[row_subitem].column_obj);
+                self.cover_row_subcols(row_subitem);
                 row_subitem = self.matrix[row_subitem].right as usize;
             }
 
@@ -113,8 +113,27 @@ impl Solver {
         return false;
     }
 
-    fn cover_col(&mut self, col_idx: u32) {}
-    fn uncover_col(&mut self, col_idx: u32) {}
+    // given a row item in col, covers col and OTHER rows in col
+    fn cover_row_subcols(&mut self, start_pos: usize) {
+        self.cover_col(start_pos);
+
+        let mut col_pos: usize = self.matrix[start_pos].down as usize;
+        while col_pos != start_pos {
+            if self.matrix[col_pos].column_size.is_none() {
+                self.cover_row(col_pos);
+            }
+            col_pos = self.matrix[col_pos].down as usize;
+        }
+    }
+
+    fn cover_col(&mut self, node_idx: usize) {
+        let col = self.matrix[self.matrix[node_idx].column_obj as usize].clone();
+        self.matrix[col.left as usize].right = col.right;
+        self.matrix[col.right as usize].left = col.left;
+    }
+
+    fn cover_row(&mut self, start_pos: usize) {}
+    fn uncover_col(&mut self, node_pos: u32) {}
 
     // n must be a square number
     fn init_grid(n: u32) -> Self {
@@ -141,7 +160,7 @@ impl Solver {
             down: 0,
             right: 1,
             left: root_idx,
-            column_size: Some(9),
+            column_size: Some(n),
         });
         for col_idx in 1..root_idx {
             matrix.push(Node {
@@ -150,7 +169,7 @@ impl Solver {
                 down: col_idx,
                 right: col_idx + 1,
                 left: col_idx - 1,
-                column_size: Some(9),
+                column_size: Some(n),
             });
         }
         // root col obj
@@ -160,7 +179,7 @@ impl Solver {
             down: root_idx,
             right: 0,
             left: root_idx - 1,
-            column_size: Some(9),
+            column_size: Some(n),
         });
 
         // initialize matrix nodes
