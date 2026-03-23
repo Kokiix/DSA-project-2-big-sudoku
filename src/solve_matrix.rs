@@ -21,7 +21,7 @@ pub struct Solver {
 impl Solver {
     pub fn solve(n: u32) -> Vec<usize> {
         let mut s = Self::init_grid(n);
-        s.explore_min_col();
+        // s.explore_min_col();
         s.solution
     }
 
@@ -43,8 +43,18 @@ impl Solver {
         within each subsection, entries go from 1 to n in the first position, then the 2nd, etc
         */
         let root_idx = 4 * n2;
+
+        matrix.push(Node {
+            column_obj: 0,
+            up: 0,
+            down: 0,
+            right: 1,
+            left: root_idx,
+            column_size: Some(n),
+        });
+
         // first col obj, linked to root
-        for col_idx in 0..=root_idx {
+        for col_idx in 1..=root_idx {
             matrix.push(Node {
                 column_obj: col_idx,
                 up: col_idx,
@@ -56,7 +66,6 @@ impl Solver {
         }
 
         // wrap edges
-        matrix[0].left = root_idx;
         matrix[root_idx as usize].right = 0;
         matrix[root_idx as usize].column_size = None;
 
