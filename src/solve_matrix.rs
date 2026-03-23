@@ -85,17 +85,23 @@ impl Solver {
 
         // Init the 4n^3 nodes, 1 row at a time.
         let mut insert_idx = root_idx + 1;
+        let sqrt_n = (n as f64).sqrt() as u32;
+
         for grid_value in 0..n {
             for grid_position in 0..n2 {
+                let row = grid_position / n;
+                let col = grid_position % n;
+                let subgrid = (row / sqrt_n) * sqrt_n + (col / sqrt_n);
+
                 Self::insert_row(
                     &mut matrix,
                     insert_idx,
                     &[
                         // Positions of the columns that each node should fall into
-                        grid_position,                           // existence
-                        n2 + grid_position / n + grid_value,     // row
-                        2 * n2 + grid_position % n + grid_value, // col
-                        3 * n2 + grid_position / n + grid_value, // subgrid
+                        grid_position,                     // existence
+                        n2 + row * n + grid_value,         // row
+                        2 * n2 + col * n + grid_value,     // col
+                        3 * n2 + subgrid * n + grid_value, // subgrid
                     ],
                 );
 
@@ -136,7 +142,7 @@ impl Solver {
 
         let col_node = self.matrix[col_obj].clone();
         let mut row_item: usize = col_node.down as usize;
-        if col_node.column_size.unwrap() == 1 {
+        if col_node.column_size.unwrap() == 0 {
             return false;
         }
 
