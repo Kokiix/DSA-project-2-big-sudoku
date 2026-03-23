@@ -65,9 +65,11 @@ impl Solver {
         let mut col_traverse = col_idx;
         let mut min_size = u32::MAX;
         while col_traverse != root {
-            if self.matrix[col_traverse].column_size.unwrap() < min_size {
+            if let Some(size) = self.matrix[col_traverse].column_size
+                && size < min_size
+            {
                 col_idx = col_traverse;
-                min_size = self.matrix[col_idx].column_size.unwrap();
+                min_size = size;
             }
             col_traverse = self.matrix[col_traverse].right as usize;
         }
@@ -154,15 +156,7 @@ impl Solver {
         */
         let root_idx = 4 * n2;
         // first col obj, linked to root
-        matrix.push(Node {
-            column_obj: 0,
-            up: 0,
-            down: 0,
-            right: 1,
-            left: root_idx,
-            column_size: Some(n),
-        });
-        for col_idx in 1..root_idx {
+        for col_idx in 0..=root_idx {
             matrix.push(Node {
                 column_obj: col_idx,
                 up: col_idx,
@@ -172,15 +166,11 @@ impl Solver {
                 column_size: Some(n),
             });
         }
-        // root col obj
-        matrix.push(Node {
-            column_obj: root_idx,
-            up: root_idx,
-            down: root_idx,
-            right: 0,
-            left: root_idx - 1,
-            column_size: Some(n),
-        });
+
+        // wrap edges
+        matrix[0].left = root_idx;
+        matrix[root_idx as usize].right = 0;
+        matrix[root_idx as usize].column_size = None;
 
         // initialize matrix nodes
         let mut new_node_pos = root_idx + 1;
