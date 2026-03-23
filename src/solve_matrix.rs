@@ -1,5 +1,25 @@
-// TODO: prove these statements with math
+/*!
+ * Create a circular doubly linked list to represent all states of the given board size, then recursively traverse the list to solve the matrix.
+ * # Matrix Structure
+ * ## In Theory:
+ * Rows: (all the ways the n values fit into n^2 grid) = n * n^2 = n^3, + 1 row for column objects
+ * Columns: Each column falls into 1 of 4 constraint types: existence, row, col, subgrid.
+ * For example, there could be a column that represents the constraint that a solution must have some number in (0, 0).
+ * From this, you should be able to discern that each column has n values, but only 1 may be present in any given solution.
+ *
+ * ## In Implementation:
+ * The rows are laid out end to end in a Vec of size 4(n^3 + 1).
+ * Each node will "point" to another node by containing the index of the other node, rather than a memory location.
+ * The first 4n^2 + 1 indices will be the headers, with the 4 constraint types beginning at the following indices.
+ *      existence = 0
+ *      row = n^2
+ *      col = 2n^2
+ *      subgrid = 3n^2
+ *      root = 4n^2
+!*/
+
 // u16 is too small; max square sudoku size is ~144
+// TODO: prove the above in a comment?
 #[derive(Clone)]
 pub struct Node {
     pub column_obj: u32,
@@ -20,30 +40,18 @@ pub struct Solver {
 
 impl Solver {
     pub fn solve(n: u32) -> Vec<usize> {
-        let mut s = Self::init_grid(n);
-        // s.explore_min_col();
-        s.solution
+        let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
+        s.find_solution_branch();
+        return s.solution;
     }
 
-    // n must be a square number
-    fn init_grid(n: u32) -> Self {
-        // rows = (all the ways the n values fit into n ^2 grid) = n^3, + 1 for headers
-        // cols = 4 constraint types, existence, row, col, subgrid, each w n^2 possible values, but each row can only match 4 total constraints
+    fn init_matrix(n: u32) -> Self {
         let mut matrix = Vec::with_capacity(((n.pow(3) + 1) * 4) as usize);
         let n2 = n.pow(2);
-
-        /* the first 4n^2 + 1 indices will be the headers, with the constraint subsections ordered as follows:
-        section = starting index
-        existence = 0
-        row = n^2
-        col = 2n^2
-        subgrid = 3n^2
-        root = 4n^2
-
-        within each subsection, entries go from 1 to n in the first position, then the 2nd, etc
-        */
         let root_idx = 4 * n2;
 
+        // Init column objects
+        // (The 1st node can't go in loop bc. left "pointer" would go negative; has to wrap around to root on right side)
         matrix.push(Node {
             column_obj: 0,
             up: 0,
@@ -53,7 +61,6 @@ impl Solver {
             column_size: Some(n),
         });
 
-        // first col obj, linked to root
         for col_idx in 1..=root_idx {
             matrix.push(Node {
                 column_obj: col_idx,
@@ -64,12 +71,10 @@ impl Solver {
                 column_size: Some(n),
             });
         }
-
-        // wrap edges
         matrix[root_idx as usize].right = 0;
         matrix[root_idx as usize].column_size = None;
 
-        // initialize matrix nodes
+        // Init the 4n^3 nodes, 1 row at a time.
         let mut new_node_pos = root_idx + 1;
         for grid_value in 0..n {
             for grid_position in 0..n2 {
@@ -77,7 +82,13 @@ impl Solver {
                     &mut matrix,
                     new_node_pos,
                     &[
-                        // pointers to the column objects corresponding to each item in the row
+                        /*
+                        From a linked list perspective, the nodes are neighbors,
+                        but because the list is grouped into the 4 constraint categories,
+                        the node indices are scattered over the list.
+
+                        Below are the index positions for each of the 4 nodes in the row.
+                        */
                         grid_position,                           // existence
                         n2 + grid_position / n + grid_value,     // row
                         2 * n2 + grid_position % n + grid_value, // col
@@ -98,38 +109,14 @@ impl Solver {
         }
     }
 
-    fn create_connected(matrix: &mut Vec<Node>, pos: u32, col_obj: u32) -> Node {
-        let bot_col_node = matrix[col_obj as usize].up;
-        matrix[bot_col_node as usize].down = pos;
-        matrix[col_obj as usize].up = pos;
-        Node {
-            column_obj: col_obj,
-            up: bot_col_node,
-            down: col_obj,
-            right: pos + 1,
-            left: pos - 1,
-            column_size: None,
-        }
-    }
-
-    fn insert_row(matrix: &mut Vec<Node>, starting_pos: u32, col_positions: &[u32]) {
-        for (i, col_pos) in col_positions.iter().enumerate() {
-            let n = Self::create_connected(matrix, starting_pos + i as u32, *col_pos);
-            matrix.push(n);
-        }
-
-        matrix[starting_pos as usize].left = starting_pos + 3;
-        matrix[starting_pos as usize + 3].right = starting_pos;
-    }
-
-    // false = fail on this recursive branch, true = matrix solved
-    fn explore_min_col(&mut self) -> bool {
+    /// Recursively search for solution. Returning false = fail on this recursive branch, true = matrix solved, short circuiting
+    fn find_solution_branch(&mut self) -> bool {
         let root = self.root;
-        // check if solved already
         if self.matrix[root].right == root as u32 {
             return true;
         }
-        // get col w least elements
+
+        // Choose col w least elements as heuristic, hopefully reducing search time
         let mut col_idx: usize = self.matrix[root].right as usize;
         let mut col_traverse = col_idx;
         let mut min_size = u32::MAX;
@@ -151,24 +138,26 @@ impl Solver {
 
         self.matrix[col_node.left as usize].right = col_node.right;
         self.matrix[col_node.right as usize].left = col_node.left;
-        // try out each row in col
+
+        // Test each row in the column as a potential solution
         while row_item != col_idx {
-            // cover stuff
             self.solution.push(row_item);
             let mut row_subitem: usize = self.matrix[row_item].right as usize;
+            // Cover cols that this row satisfies, and eliminate some overlapping rows / answers
             while row_subitem != row_item {
-                self.cover_row_subcols(row_subitem);
+                self.cover_col_and_rows(row_subitem);
                 row_subitem = self.matrix[row_subitem].right as usize;
             }
 
-            // continue exploring
-            if self.explore_min_col() {
-                // leave primary column unlinked still
+            // Continue recursion
+            if self.find_solution_branch() {
+                // NOTE: currently leaves matrix in broken state by short circuiting here..
                 return true;
             }
-            // else else uncover
+
+            // If not returned by this point, this branch has failed, so covering must be undone.
             self.solution.pop();
-            // make sure to go in reverse order
+            // TODO: ensure reverse order?
             row_subitem = self.matrix[row_subitem].left as usize;
             while row_subitem != row_item {
                 self.uncover_col(self.matrix[row_subitem].column_obj);
@@ -184,8 +173,7 @@ impl Solver {
         return false;
     }
 
-    // given a row item in col, covers col and OTHER rows in col
-    fn cover_row_subcols(&mut self, start_pos: usize) {
+    fn cover_col_and_rows(&mut self, start_pos: usize) {
         self.cover_col(start_pos);
 
         let mut col_pos: usize = self.matrix[start_pos].down as usize;
@@ -205,4 +193,29 @@ impl Solver {
 
     fn cover_row(&mut self, start_pos: usize) {}
     fn uncover_col(&mut self, node_pos: u32) {}
+
+    // Helper for initializing the matrix
+    fn insert_row(matrix: &mut Vec<Node>, starting_pos: u32, col_positions: &[u32]) {
+        fn create_and_link_node(matrix: &mut Vec<Node>, pos: u32, col_obj: u32) -> Node {
+            let bot_col_node = matrix[col_obj as usize].up;
+            matrix[bot_col_node as usize].down = pos;
+            matrix[col_obj as usize].up = pos;
+            Node {
+                column_obj: col_obj,
+                up: bot_col_node,
+                down: col_obj,
+                right: pos + 1,
+                left: pos - 1,
+                column_size: None,
+            }
+        }
+
+        for (i, col_pos) in col_positions.iter().enumerate() {
+            let n = create_and_link_node(matrix, starting_pos + i as u32, *col_pos);
+            matrix.push(n);
+        }
+
+        matrix[starting_pos as usize].left = starting_pos + 3;
+        matrix[starting_pos as usize + 3].right = starting_pos;
+    }
 }
