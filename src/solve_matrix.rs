@@ -84,27 +84,22 @@ impl Solver {
         matrix[root_idx as usize].column_size = None;
 
         // Init the 4n^3 nodes, 1 row at a time.
-        let mut new_node_pos = root_idx + 1;
+        let mut insert_idx = root_idx + 1;
         for grid_value in 0..n {
             for grid_position in 0..n2 {
                 Self::insert_row(
                     &mut matrix,
-                    new_node_pos,
+                    insert_idx,
                     &[
-                        /*
-                        From a linked list perspective, the nodes are neighbors,
-                        but because the list is grouped into the 4 constraint categories,
-                        the node indices are scattered over the list.
-
-                        Below are the index positions for each of the 4 nodes in the row.
-                        */
+                        // Positions of the columns that each node should fall into
                         grid_position,                           // existence
                         n2 + grid_position / n + grid_value,     // row
                         2 * n2 + grid_position % n + grid_value, // col
                         3 * n2 + grid_position / n + grid_value, // subgrid
                     ],
                 );
-                new_node_pos += 4;
+
+                insert_idx += 4;
             }
         }
 
@@ -245,27 +240,23 @@ impl Solver {
     }
 
     // Helper for initializing the matrix
-    fn insert_row(matrix: &mut Vec<Node>, starting_pos: u32, col_positions: &[u32]) {
-        fn create_and_link_node(matrix: &mut Vec<Node>, pos: u32, col_obj: u32) -> Node {
-            let bot_col_node = matrix[col_obj as usize].up;
-            matrix[bot_col_node as usize].down = pos;
-            matrix[col_obj as usize].up = pos;
-            Node {
-                column_obj: col_obj,
+    fn insert_row(matrix: &mut Vec<Node>, row_start: u32, col_objs: &[u32]) {
+        for (i, col_obj) in col_objs.iter().enumerate() {
+            let node_pos = row_start + i as u32;
+            let bot_col_node = matrix[*col_obj as usize].up;
+            matrix[bot_col_node as usize].down = node_pos;
+            matrix[*col_obj as usize].up = node_pos;
+            matrix.push(Node {
+                column_obj: *col_obj,
                 up: bot_col_node,
-                down: col_obj,
-                right: pos + 1,
-                left: pos - 1,
+                down: *col_obj,
+                right: node_pos + 1,
+                left: node_pos - 1,
                 column_size: None,
-            }
+            })
         }
 
-        for (i, col_pos) in col_positions.iter().enumerate() {
-            let n = create_and_link_node(matrix, starting_pos + i as u32, *col_pos);
-            matrix.push(n);
-        }
-
-        matrix[starting_pos as usize].left = starting_pos + 3;
-        matrix[starting_pos as usize + 3].right = starting_pos;
+        matrix[row_start as usize].left = row_start + 3;
+        matrix[row_start as usize + 3].right = row_start;
     }
 }
