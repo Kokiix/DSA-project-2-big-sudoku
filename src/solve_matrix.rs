@@ -41,8 +41,6 @@ pub struct Node {
 pub struct Solver {
     matrix: Vec<Node>,
     solution: Vec<usize>,
-    n: u32,
-    n2: u32,
     root: usize,
 }
 
@@ -50,7 +48,6 @@ impl Solver {
     pub fn solve(n: u32) -> Vec<usize> {
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
         s.find_solution_branch();
-        &s.solution;
         return s.solution;
     }
 
@@ -113,8 +110,6 @@ impl Solver {
         Solver {
             matrix,
             solution,
-            n,
-            n2,
             root: root_idx as usize,
         }
     }
