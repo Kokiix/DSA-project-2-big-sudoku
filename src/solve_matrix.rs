@@ -1,5 +1,9 @@
 /*!
  * Create a circular doubly linked list to represent all states of the given board size, then recursively traverse the list to solve the matrix.
+ *
+ * Returns a list of node indices, to be decoded using the below, though the implementation should only ever live in lib.rs.
+ *
+ *
  * # Matrix Structure
  * ## In Theory:
  * Rows: (all the ways the n values fit into n^2 grid) = n * n^2 = n^3, + 1 row for column objects
@@ -16,6 +20,10 @@
  *      col = 2n^2
  *      subgrid = 3n^2
  *      root = 4n^2
+ *
+ *
+ * The actual nodes themselves are ordered by position, then value.
+ * Ex: (1 in (0, 0)), (1 in (1, 0))...(2 in (0, 0)), (2 in (1, 0))...etc
 !*/
 
 // u16 is too small; max square sudoku size is ~144
@@ -42,6 +50,7 @@ impl Solver {
     pub fn solve(n: u32) -> Vec<usize> {
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
         s.find_solution_branch();
+        &s.solution;
         return s.solution;
     }
 
@@ -117,22 +126,22 @@ impl Solver {
         }
 
         // Choose col w least elements as heuristic, hopefully reducing search time
-        let mut col_idx: usize = self.matrix[root].right as usize;
-        let mut col_traverse = col_idx;
+        let mut col_obj: usize = self.matrix[root].right as usize;
+        let mut col_traverse = col_obj;
         let mut min_size = u32::MAX;
         while col_traverse != root {
             if let Some(size) = self.matrix[col_traverse].column_size
                 && size < min_size
             {
-                col_idx = col_traverse;
+                col_obj = col_traverse;
                 min_size = size;
             }
             col_traverse = self.matrix[col_traverse].right as usize;
         }
 
-        let col_node = self.matrix[col_idx].clone();
+        let col_node = self.matrix[col_obj].clone();
         let mut row_item: usize = col_node.down as usize;
-        if row_item == col_idx {
+        if col_node.column_size.unwrap() == 1 {
             return false;
         }
 
@@ -140,7 +149,7 @@ impl Solver {
         self.matrix[col_node.right as usize].left = col_node.left;
 
         // Test each row in the column as a potential solution
-        while row_item != col_idx {
+        while row_item != col_obj {
             self.solution.push(row_item);
             let mut row_subitem: usize = self.matrix[row_item].right as usize;
             // Cover cols that this row satisfies, and eliminate some overlapping rows / answers
@@ -157,42 +166,83 @@ impl Solver {
 
             // If not returned by this point, this branch has failed, so covering must be undone.
             self.solution.pop();
-            // TODO: ensure reverse order?
             row_subitem = self.matrix[row_subitem].left as usize;
             while row_subitem != row_item {
-                self.uncover_col(self.matrix[row_subitem].column_obj);
+                self.uncover_col_and_rows(row_subitem);
                 row_subitem = self.matrix[row_subitem].left as usize;
             }
 
             row_item = self.matrix[row_item].down as usize;
         }
 
-        self.matrix[col_node.left as usize].right = col_idx as u32;
-        self.matrix[col_node.right as usize].left = col_idx as u32;
+        self.matrix[col_node.left as usize].right = col_obj as u32;
+        self.matrix[col_node.right as usize].left = col_obj as u32;
 
         return false;
     }
 
     fn cover_col_and_rows(&mut self, start_pos: usize) {
-        self.cover_col(start_pos);
+        let col = self.matrix[self.matrix[start_pos].column_obj as usize].clone();
+        self.matrix[col.left as usize].right = col.right;
+        self.matrix[col.right as usize].left = col.left;
 
-        let mut col_pos: usize = self.matrix[start_pos].down as usize;
-        while col_pos != start_pos {
-            if self.matrix[col_pos].column_size.is_none() {
-                self.cover_row(col_pos);
+        let mut row: usize = self.matrix[start_pos].down as usize;
+        while row != start_pos {
+            if self.matrix[row].column_size.is_none() {
+                self.cover_row(row);
             }
-            col_pos = self.matrix[col_pos].down as usize;
+            row = self.matrix[row].down as usize;
         }
     }
 
-    fn cover_col(&mut self, node_idx: usize) {
-        let col = self.matrix[self.matrix[node_idx].column_obj as usize].clone();
-        self.matrix[col.left as usize].right = col.right;
-        self.matrix[col.right as usize].left = col.left;
+    // Leaves node under start_pos still vertically linked, because that column will be unlinked already, and so that the row can be retrieved later.
+    fn cover_row(&mut self, start_pos: usize) {
+        let mut row_pos = self.matrix[start_pos].right as usize;
+        let mut row_node = self.matrix[row_pos].clone();
+        while row_pos != start_pos {
+            self.matrix[row_node.up as usize].down = row_node.down;
+            self.matrix[row_node.down as usize].up = row_node.up;
+            let s = self.matrix[row_node.column_obj as usize]
+                .column_size
+                .unwrap();
+            self.matrix[row_node.column_obj as usize].column_size = Some(s - 1);
+
+            row_pos = self.matrix[row_pos].right as usize;
+            row_node = self.matrix[row_pos].clone();
+        }
     }
 
-    fn cover_row(&mut self, start_pos: usize) {}
-    fn uncover_col(&mut self, node_pos: u32) {}
+    // These 2 should exactly mirror the 2 functions above
+    fn uncover_col_and_rows(&mut self, start_pos: usize) {
+        let mut row: usize = self.matrix[start_pos].up as usize;
+        while row != start_pos {
+            if self.matrix[row].column_size.is_none() {
+                self.uncover_row(row);
+            }
+            row = self.matrix[row].up as usize;
+        }
+
+        let col_idx = self.matrix[start_pos].column_obj as usize;
+        let col = self.matrix[col_idx].clone();
+        self.matrix[col.left as usize].right = col_idx as u32;
+        self.matrix[col.right as usize].left = col_idx as u32;
+    }
+
+    fn uncover_row(&mut self, start_pos: usize) {
+        let mut row_pos = self.matrix[start_pos].left as usize;
+        let mut row_node = self.matrix[row_pos].clone();
+        while row_pos != start_pos {
+            self.matrix[row_node.up as usize].down = row_pos as u32;
+            self.matrix[row_node.down as usize].up = row_pos as u32;
+            let s = self.matrix[row_node.column_obj as usize]
+                .column_size
+                .unwrap();
+            self.matrix[row_node.column_obj as usize].column_size = Some(s + 1);
+
+            row_pos = self.matrix[row_pos].left as usize;
+            row_node = self.matrix[row_pos].clone();
+        }
+    }
 
     // Helper for initializing the matrix
     fn insert_row(matrix: &mut Vec<Node>, starting_pos: u32, col_positions: &[u32]) {
