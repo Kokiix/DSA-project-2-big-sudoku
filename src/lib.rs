@@ -19,10 +19,18 @@ pub fn generate_sudoku(n: u32) -> Option<FinalSudokuBoard> {
     if n.isqrt().pow(2) != n {
         return None;
     }
+
+    let n2 = n.pow(2) as usize;
     let sol: Vec<usize> = Solver::solve(n);
+    let mut solved: Vec<usize> = vec![0; n2];
+
+    for row_idx in sol {
+        let row_idx = (row_idx - 4 * n2) / 4;
+        solved[row_idx % n2] = row_idx / n2 + 1;
+    }
 
     Some(FinalSudokuBoard {
         init_grid: vec![1; 81],
-        solved_grid: vec![0; 81],
+        solved_grid: solved,
     })
 }

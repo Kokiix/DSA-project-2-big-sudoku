@@ -201,7 +201,9 @@ impl Solver {
             let s = self.matrix[row_node.column_obj as usize]
                 .column_size
                 .unwrap();
-            self.matrix[row_node.column_obj as usize].column_size = Some(s - 1);
+            if s > 0 {
+                self.matrix[row_node.column_obj as usize].column_size = Some(s - 1);
+            }
 
             row_pos = self.matrix[row_pos].right as usize;
             row_node = self.matrix[row_pos].clone();

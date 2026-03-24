@@ -1,6 +1,14 @@
-use crate::solve_matrix::Solver;
+use crate::{generate_sudoku, solve_matrix::Solver};
 
 #[test]
-fn create_matrix() {
-    let a = Solver::solve(4);
+fn print_solved() {
+    let size = 25;
+    let grid = generate_sudoku(size as u32).unwrap().solved_grid;
+    for (i, n) in grid.iter().enumerate() {
+        if i % size == 0 {
+            print!("\n");
+        }
+        print!("{n} ");
+    }
+    print!("\n");
 }
