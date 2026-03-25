@@ -42,12 +42,15 @@ pub struct Solver {
     matrix: Vec<Node>,
     solution: Vec<usize>,
     root: usize,
+    n: u32,
+    rng_state: usize,
 }
 
 impl Solver {
-    pub fn solve(n: u32) -> Vec<usize> {
+    pub fn solve(n: u32, seed: usize) -> Vec<usize> {
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
-        s.find_solution_branch();
+        s.rng_state = seed;
+        // s.find_solution_branch();
         return s.solution;
     }
 
@@ -111,6 +114,8 @@ impl Solver {
             matrix,
             solution,
             root: root_idx as usize,
+            n,
+            rng_state: 0,
         }
     }
 
@@ -124,7 +129,7 @@ impl Solver {
         // Choose col w least elements as heuristic, hopefully reducing search time
         let mut col_obj: usize = self.matrix[root].right as usize;
         let mut col_traverse = col_obj;
-        let mut min_size = u32::MAX;
+        let mut min_size = self.n;
         while col_traverse != root {
             if let Some(size) = self.matrix[col_traverse].column_size
                 && size < min_size
@@ -134,6 +139,8 @@ impl Solver {
             }
             col_traverse = self.matrix[col_traverse].right as usize;
         }
+
+        // if min_size == n {}
 
         let col_node = self.matrix[col_obj].clone();
         let mut row_item: usize = col_node.down as usize;
@@ -261,5 +268,19 @@ impl Solver {
 
         matrix[row_start as usize].left = row_start + 3;
         matrix[row_start as usize + 3].right = row_start;
+    }
+
+    fn rng(&mut self, min: usize, max: usize) -> usize {
+        let range = max - min + 1;
+        return self.xorshift() % range + min;
+    }
+
+    fn xorshift(&mut self) -> usize {
+        let mut rng = self.rng_state;
+        rng ^= rng << 13;
+        rng ^= rng >> 17;
+        rng ^= rng << 5;
+        self.rng_state = rng;
+        return rng;
     }
 }

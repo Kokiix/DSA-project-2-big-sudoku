@@ -15,13 +15,13 @@ pub struct FinalSudokuBoard {
 }
 
 #[wasm_bindgen]
-pub fn generate_sudoku(n: u32) -> Option<FinalSudokuBoard> {
+pub fn generate_sudoku(n: u32, seed: usize) -> Option<FinalSudokuBoard> {
     if n.isqrt().pow(2) != n {
         return None;
     }
 
     let n2 = n.pow(2) as usize;
-    let sol: Vec<usize> = Solver::solve(n);
+    let sol: Vec<usize> = Solver::solve(n, seed);
     let mut solved: Vec<usize> = vec![0; n2];
 
     for row_idx in sol {
