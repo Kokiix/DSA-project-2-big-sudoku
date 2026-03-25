@@ -141,8 +141,7 @@ impl Solver {
             return false;
         }
 
-        self.matrix[col_node.left as usize].right = col_node.right;
-        self.matrix[col_node.right as usize].left = col_node.left;
+        self.cover_col_and_rows(col_obj);
 
         // Test each row in the column as a potential solution
         while row_item != col_obj {
@@ -150,7 +149,8 @@ impl Solver {
             let mut row_subitem: usize = self.matrix[row_item].right as usize;
             // Cover cols that this row satisfies, and eliminate some overlapping rows / answers
             while row_subitem != row_item {
-                self.cover_col_and_rows(row_subitem);
+                let j_col = self.matrix[row_subitem].column_obj as usize;
+                self.cover_col_and_rows(j_col);
                 row_subitem = self.matrix[row_subitem].right as usize;
             }
 
@@ -164,15 +164,15 @@ impl Solver {
             self.solution.pop();
             row_subitem = self.matrix[row_subitem].left as usize;
             while row_subitem != row_item {
-                self.uncover_col_and_rows(row_subitem);
+                let j_col = self.matrix[row_subitem].column_obj as usize;
+                self.uncover_col_and_rows(j_col);
                 row_subitem = self.matrix[row_subitem].left as usize;
             }
 
             row_item = self.matrix[row_item].down as usize;
         }
 
-        self.matrix[col_node.left as usize].right = col_obj as u32;
-        self.matrix[col_node.right as usize].left = col_obj as u32;
+        self.uncover_col_and_rows(col_obj);
 
         return false;
     }
