@@ -45,17 +45,13 @@ pub struct Solver {
     root: usize,
     n: u32,
     rng_state: u32,
-    depth: usize,
 }
 
 impl Solver {
     pub fn solve(n: u32, seed: usize) -> Vec<usize> {
-        let mut orig = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
-        orig.rng_state = if seed == 0 { 1 } else { seed as u32 };
-        let mut s = orig.clone();
-        while !s.find_solution_branch() {
-            s = orig.clone();
-        }
+        let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
+        s.rng_state = if seed == 0 { 1 } else { seed as u32 };
+        s.find_solution_branch();
         return s.solution;
     }
 
