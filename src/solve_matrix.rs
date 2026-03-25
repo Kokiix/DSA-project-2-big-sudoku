@@ -140,7 +140,10 @@ impl Solver {
             col_traverse = self.matrix[col_traverse].right as usize;
         }
 
-        // if min_size == n {}
+        // Randomize first col chosen (surely this won't trigger after first and hit a hidden one)
+        if min_size == self.n {
+            col_obj = self.rand_int_to(self.root);
+        }
 
         let col_node = self.matrix[col_obj].clone();
         let mut row_item: usize = col_node.down as usize;
@@ -150,12 +153,23 @@ impl Solver {
 
         self.cover_col_and_rows(col_obj);
 
-        // Test each row in the column as a potential solution
+        // Grab all rows (potential solution branches)
+        let mut rows = Vec::with_capacity(col_node.column_size.unwrap() as usize);
         while row_item != col_obj {
-            self.solution.push(row_item);
-            let mut row_subitem: usize = self.matrix[row_item].right as usize;
+            rows.push(row_item);
+            row_item = self.matrix[row_item].down as usize;
+        }
+        // Shuffle rows (Fisher-Yates)
+        for i in (rows.len() - 1)..0 {
+            let j = self.rand_int_to(i + 1);
+            rows.swap(i, j);
+        }
+        // Then try to recurse further for each row
+        for row in rows {
+            self.solution.push(row);
+            let mut row_subitem: usize = self.matrix[row].right as usize;
             // Cover cols that this row satisfies, and eliminate some overlapping rows / answers
-            while row_subitem != row_item {
+            while row_subitem != row {
                 let j_col = self.matrix[row_subitem].column_obj as usize;
                 self.cover_col_and_rows(j_col);
                 row_subitem = self.matrix[row_subitem].right as usize;
@@ -170,13 +184,11 @@ impl Solver {
             // If not returned by this point, this branch has failed, so covering must be undone.
             self.solution.pop();
             row_subitem = self.matrix[row_subitem].left as usize;
-            while row_subitem != row_item {
+            while row_subitem != row {
                 let j_col = self.matrix[row_subitem].column_obj as usize;
                 self.uncover_col_and_rows(j_col);
                 row_subitem = self.matrix[row_subitem].left as usize;
             }
-
-            row_item = self.matrix[row_item].down as usize;
         }
 
         self.uncover_col_and_rows(col_obj);
@@ -270,9 +282,9 @@ impl Solver {
         matrix[row_start as usize + 3].right = row_start;
     }
 
-    fn rng(&mut self, min: usize, max: usize) -> usize {
-        let range = max - min + 1;
-        return self.xorshift() % range + min;
+    // Integer from 0 to max
+    fn rand_int_to(&mut self, non_incl_max: usize) -> usize {
+        return (self.xorshift() * non_incl_max) >> 32;
     }
 
     fn xorshift(&mut self) -> usize {
