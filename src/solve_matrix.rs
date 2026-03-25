@@ -117,7 +117,6 @@ impl Solver {
             root: root_idx as usize,
             n,
             rng_state: 0,
-            depth: 0,
         }
     }
 
@@ -127,10 +126,6 @@ impl Solver {
         if self.matrix[root].right == root as u32 {
             return true;
         }
-        if self.depth > 50_000 {
-            return false;
-        }
-        self.depth += 1;
 
         // Choose col w least elements as heuristic, hopefully reducing search time
         let mut col_obj: usize = self.matrix[root].right as usize;
@@ -219,7 +214,6 @@ impl Solver {
         }
     }
 
-    // Leaves node under start_pos still vertically linked, because that column will be unlinked already, and so that the row can be retrieved later.
     fn cover_row(&mut self, start_pos: usize) {
         let mut row_pos = self.matrix[start_pos].right as usize;
         let mut row_node = self.matrix[row_pos].clone();
