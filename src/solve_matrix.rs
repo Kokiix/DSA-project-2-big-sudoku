@@ -38,19 +38,24 @@ pub struct Node {
     pub column_size: Option<u32>,
 }
 
+#[derive(Clone)]
 pub struct Solver {
     matrix: Vec<Node>,
     solution: Vec<usize>,
     root: usize,
     n: u32,
     rng_state: u32,
+    depth: usize,
 }
 
 impl Solver {
     pub fn solve(n: u32, seed: usize) -> Vec<usize> {
-        let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
-        s.rng_state = if seed == 0 { 1 } else { seed as u32 };
-        s.find_solution_branch();
+        let mut orig = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
+        orig.rng_state = if seed == 0 { 1 } else { seed as u32 };
+        let mut s = orig.clone();
+        while !s.find_solution_branch() {
+            s = orig.clone();
+        }
         return s.solution;
     }
 
@@ -116,6 +121,7 @@ impl Solver {
             root: root_idx as usize,
             n,
             rng_state: 0,
+            depth: 0,
         }
     }
 
@@ -125,6 +131,10 @@ impl Solver {
         if self.matrix[root].right == root as u32 {
             return true;
         }
+        if self.depth > 50_000 {
+            return false;
+        }
+        self.depth += 1;
 
         // Choose col w least elements as heuristic, hopefully reducing search time
         let mut col_obj: usize = self.matrix[root].right as usize;
