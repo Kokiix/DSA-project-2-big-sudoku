@@ -43,14 +43,14 @@ pub struct Solver {
     solution: Vec<usize>,
     root: usize,
     n: u32,
-    rng_state: usize,
+    rng_state: u32,
 }
 
 impl Solver {
     pub fn solve(n: u32, seed: usize) -> Vec<usize> {
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
-        s.rng_state = seed;
-        // s.find_solution_branch();
+        s.rng_state = if seed == 0 { 1 } else { seed as u32 };
+        s.find_solution_branch();
         return s.solution;
     }
 
@@ -131,11 +131,14 @@ impl Solver {
         let mut col_traverse = col_obj;
         let mut min_size = self.n;
         while col_traverse != root {
-            if let Some(size) = self.matrix[col_traverse].column_size
-                && size < min_size
-            {
-                col_obj = col_traverse;
-                min_size = size;
+            if let Some(size) = self.matrix[col_traverse].column_size {
+                if size < min_size {
+                    col_obj = col_traverse;
+                    min_size = size;
+                    if min_size <= 1 {
+                        break;
+                    }
+                }
             }
             col_traverse = self.matrix[col_traverse].right as usize;
         }
@@ -160,7 +163,7 @@ impl Solver {
             row_item = self.matrix[row_item].down as usize;
         }
         // Shuffle rows (Fisher-Yates)
-        for i in (rows.len() - 1)..0 {
+        for i in (1..rows.len()).rev() {
             let j = self.rand_int_to(i + 1);
             rows.swap(i, j);
         }
@@ -284,10 +287,10 @@ impl Solver {
 
     // Integer from 0 to max
     fn rand_int_to(&mut self, non_incl_max: usize) -> usize {
-        return (self.xorshift() * non_incl_max) >> 32;
+        return (self.xorshift() as usize) % non_incl_max;
     }
 
-    fn xorshift(&mut self) -> usize {
+    fn xorshift(&mut self) -> u32 {
         let mut rng = self.rng_state;
         rng ^= rng << 13;
         rng ^= rng >> 17;
