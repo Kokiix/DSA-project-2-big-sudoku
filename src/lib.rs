@@ -25,7 +25,7 @@ pub fn generate_sudoku(n: u32) -> Option<FinalSudokuBoard> {
     let mut solved: Vec<usize> = vec![0; n2];
 
     for row_idx in sol {
-        let row_idx = (row_idx - 4 * n2) / 4;
+        let row_idx = (row_idx - (4 * n2 + 1)) / 4;
         solved[row_idx % n2] = row_idx / n2 + 1;
     }
 
