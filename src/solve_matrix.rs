@@ -40,7 +40,6 @@ pub struct Node {
 
 #[derive(Clone)]
 pub struct Solver {
-    blank_matrix: Vec<Node>,
     matrix: Vec<Node>,
     pub solution: Vec<usize>,
     pub removed: Vec<usize>,
@@ -53,14 +52,34 @@ pub struct Solver {
 }
 
 impl Solver {
-    pub fn solve(n: u32, n_empty: u32, seed: usize) -> (Vec<usize>, Vec<usize>) {
+    pub fn solve(n: u32, n_to_remove: u32, seed: usize) -> (Vec<usize>, Vec<usize>) {
         // Populate solution vector
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
         s.rng_state = if seed == 0 { 1 } else { seed as u32 };
         s.find_solution_branch();
+        s.initialized = true;
 
-        // Reset, then begin removing cells
-        s.matrix = s.blank_matrix;
+        let mut cells_to_remove = s.solution.clone();
+        let mut removed_cell_this_loop = false;
+        let mut removed = 0;
+        while removed < n_to_remove {
+            // Can probably be done with a filter instead?
+            for i in 0..cells_to_remove.len() {
+                removed_cell_this_loop = false;
+                s.uncover_col_and_rows(cells_to_remove[i]);
+                if !s.find_solution_branch() {
+                    s.cover_col_and_rows(cells_to_remove[i]);
+                } else {
+                    removed_cell_this_loop = true;
+                    cells_to_remove.remove(i);
+                    removed += 1;
+                }
+            }
+
+            if !removed_cell_this_loop {
+                break;
+            }
+        }
 
         return (s.solution, s.removed);
     }
@@ -122,7 +141,6 @@ impl Solver {
 
         let solution: Vec<usize> = Vec::with_capacity(n2 as usize);
         Solver {
-            blank_matrix: matrix.clone(),
             matrix,
 
             solution: solution.clone(),
@@ -184,6 +202,8 @@ impl Solver {
             let j = self.rand_int_to(i + 1);
             rows.swap(i, j);
         }
+
+        let mut exit = false;
         // Then try to recurse further for each row
         for row in rows {
             self.solution.push(row);
@@ -202,7 +222,7 @@ impl Solver {
                 }
 
                 if self.found_solution {
-                    return false;
+                    exit = true;
                 }
                 self.found_solution = true;
             }
@@ -215,11 +235,19 @@ impl Solver {
                 self.uncover_col_and_rows(j_col);
                 row_subitem = self.matrix[row_subitem].left as usize;
             }
+
+            if exit {
+                break;
+            }
         }
 
         self.uncover_col_and_rows(col_obj);
 
-        return false;
+        if exit {
+            return false;
+        }
+
+        return self.found_solution;
     }
 }
 
