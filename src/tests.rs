@@ -2,8 +2,8 @@ use crate::{generate_sudoku, solve_matrix::Solver};
 
 #[test]
 fn print_solved() {
-    let size = 4;
-    let grid = generate_sudoku(size as u32, 5, 12346).unwrap().init_grid;
+    let size = 36;
+    let grid = generate_sudoku(size as u32, 10, 12346).unwrap().init_grid;
     for (i, n) in grid.iter().enumerate() {
         if i % size == 0 {
             print!("\n");

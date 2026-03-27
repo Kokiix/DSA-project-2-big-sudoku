@@ -11,6 +11,7 @@ pub struct FinalSudokuBoard {
     // Has 0s in place of empty cells
     init_grid: Vec<usize>,
     solution: Vec<usize>,
+    n_empty: u32,
 }
 
 #[wasm_bindgen]
@@ -37,5 +38,6 @@ pub fn generate_sudoku(n: u32, n_empty: u32, seed: usize) -> Option<FinalSudokuB
     Some(FinalSudokuBoard {
         init_grid,
         solution,
+        n_empty,
     })
 }

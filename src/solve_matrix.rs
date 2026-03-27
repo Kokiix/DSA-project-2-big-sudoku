@@ -55,11 +55,41 @@ impl Solver {
     pub fn solve(n: u32, n_to_remove: u32, seed: usize) -> (Vec<usize>, Vec<usize>) {
         // Populate solution vector
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
+        let orig_matrix = s.matrix.clone();
         s.rng_state = if seed == 0 { 1 } else { seed as u32 };
         s.find_solution_branch();
         s.initialized = true;
 
-        // TODO: Remove cells
+        let mut removed = 0;
+        let mut to_remove = s.solution.clone();
+        let mut cell_removed = true;
+        while removed < n_to_remove && cell_removed {
+            cell_removed = false;
+            let mut next: Vec<usize> = Vec::new();
+            for cell_to_be_removed in &to_remove {
+                s.matrix = orig_matrix.clone();
+                for cell in s.solution.clone() {
+                    if cell != *cell_to_be_removed {
+                        s.cover_col_and_rows(s.matrix[cell].column_obj as usize);
+                        s.cover_solution(cell);
+                    }
+                }
+
+                s.n_solutions = 0;
+                if s.find_solution_branch() {
+                    removed += 1;
+                    s.removed.push(*cell_to_be_removed);
+                    cell_removed = true;
+                } else {
+                    next.push(*cell_to_be_removed);
+                }
+
+                if removed == n_to_remove {
+                    break;
+                }
+            }
+            to_remove = next;
+        }
         return (s.solution, s.removed);
     }
 
@@ -185,13 +215,7 @@ impl Solver {
         // Then try to recurse further for each row
         for row in rows {
             self.solution.push(row);
-            let mut row_subitem: usize = self.matrix[row].right as usize;
-            // Cover cols that this row satisfies, and eliminate some overlapping rows / answers
-            while row_subitem != row {
-                let j_col = self.matrix[row_subitem].column_obj as usize;
-                self.cover_col_and_rows(j_col);
-                row_subitem = self.matrix[row_subitem].right as usize;
-            }
+            self.cover_solution(row);
 
             // Continue recursion
             if self.find_solution_branch() {
@@ -201,9 +225,9 @@ impl Solver {
                 self.n_solutions += 1;
             }
 
-            // If not returned by this point, this branch has failed, so covering must be undone.
+            // Reverse of self.cover_solution();
             self.solution.pop();
-            row_subitem = self.matrix[row_subitem].left as usize;
+            let mut row_subitem = self.matrix[row].left as usize;
             while row_subitem != row {
                 let j_col = self.matrix[row_subitem].column_obj as usize;
                 self.uncover_col_and_rows(j_col);
@@ -223,6 +247,16 @@ impl Solver {
 
 // Auxillary methods
 impl Solver {
+    fn cover_solution(&mut self, row: usize) {
+        let mut row_subitem: usize = self.matrix[row].right as usize;
+        // Cover cols that this row satisfies, and eliminate some overlapping rows / answers
+        while row_subitem != row {
+            let j_col = self.matrix[row_subitem].column_obj as usize;
+            self.cover_col_and_rows(j_col);
+            row_subitem = self.matrix[row_subitem].right as usize;
+        }
+    }
+
     fn cover_col_and_rows(&mut self, start_pos: usize) {
         let col = self.matrix[self.matrix[start_pos].column_obj as usize].clone();
         self.matrix[col.left as usize].right = col.right;
