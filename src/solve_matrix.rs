@@ -59,51 +59,7 @@ impl Solver {
         s.find_solution_branch();
         s.initialized = true;
 
-        let mut cells_to_remove = s.solution.clone();
-        let mut removed_cell_this_loop = false;
-        let mut removed = 0;
-        while removed < n_to_remove {
-            let mut future_cells_to_remove: Vec<usize> = Vec::new(); // Can maybe be done with a filter instead?
-            removed_cell_this_loop = false;
-
-            for cell in cells_to_remove {
-                // Unlink cell
-                let mut row_item = s.matrix[cell].right as usize;
-                while row_item != cell {
-                    s.uncover_col_and_rows(row_item);
-                    row_item = s.matrix[row_item].right as usize;
-                }
-                s.uncover_col_and_rows(row_item);
-
-                s.n_solutions = 0;
-                if !s.find_solution_branch() {
-                    // Relink if failed (no solution, or > 1 solution)
-                    s.cover_col_and_rows(row_item);
-                    row_item = s.matrix[row_item].left as usize;
-                    while row_item != cell {
-                        s.cover_col_and_rows(row_item);
-                        row_item = s.matrix[row_item].left as usize;
-                    }
-                    future_cells_to_remove.push(cell);
-                } else {
-                    // Continue if only 1 solution found
-                    s.removed.push(cell);
-                    removed_cell_this_loop = true;
-                    removed += 1;
-                }
-
-                if removed == n_to_remove {
-                    break;
-                }
-            }
-
-            if !removed_cell_this_loop {
-                break;
-            }
-
-            cells_to_remove = future_cells_to_remove;
-        }
-
+        // TODO: Remove cells
         return (s.solution, s.removed);
     }
 
