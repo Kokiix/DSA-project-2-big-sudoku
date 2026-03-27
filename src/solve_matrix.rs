@@ -40,19 +40,25 @@ pub struct Node {
 
 #[derive(Clone)]
 pub struct Solver {
+    blank_matrix: Vec<Node>,
     matrix: Vec<Node>,
-    solution: Vec<usize>,
+    pub solution: Vec<usize>,
+    pub removed: Vec<usize>,
+    n_to_remove: u32,
     root: usize,
     n: u32,
     rng_state: u32,
+
+    initialized: bool,
+    found_solution: bool,
 }
 
 impl Solver {
-    pub fn solve(n: u32, seed: usize) -> Vec<usize> {
+    pub fn init(n: u32, seed: usize) -> Self {
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
         s.rng_state = if seed == 0 { 1 } else { seed as u32 };
         s.find_solution_branch();
-        return s.solution;
+        return s;
     }
 
     fn init_matrix(n: u32) -> Self {
@@ -112,11 +118,18 @@ impl Solver {
 
         let solution: Vec<usize> = Vec::with_capacity(n2 as usize);
         Solver {
+            blank_matrix: matrix.clone(),
             matrix,
-            solution,
+
+            solution: solution.clone(),
+            removed: solution,
+            n_to_remove: 0,
+
             root: root_idx as usize,
             n,
             rng_state: 0,
+            initialized: false,
+            found_solution: false,
         }
     }
 
@@ -181,8 +194,14 @@ impl Solver {
 
             // Continue recursion
             if self.find_solution_branch() {
-                // NOTE: currently leaves matrix in broken state by short circuiting here..
-                return true;
+                if !self.initialized {
+                    return true;
+                }
+
+                if self.found_solution {
+                    return false;
+                }
+                self.found_solution = true;
             }
 
             // If not returned by this point, this branch has failed, so covering must be undone.
@@ -199,7 +218,10 @@ impl Solver {
 
         return false;
     }
+}
 
+// Auxillary methods
+impl Solver {
     fn cover_col_and_rows(&mut self, start_pos: usize) {
         let col = self.matrix[self.matrix[start_pos].column_obj as usize].clone();
         self.matrix[col.left as usize].right = col.right;
