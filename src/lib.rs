@@ -10,8 +10,7 @@ use crate::solve_matrix::{Node, Solver};
 pub struct FinalSudokuBoard {
     // Has 0s in place of empty cells
     init_grid: Vec<usize>,
-    // Contains 0s except for empty cells
-    solved_grid: Vec<usize>,
+    solution: Vec<usize>,
 }
 
 #[wasm_bindgen]
@@ -21,17 +20,22 @@ pub fn generate_sudoku(n: u32, n_empty: u32, seed: usize) -> Option<FinalSudokuB
     }
 
     let n2 = n.pow(2) as usize;
-    let sol = Solver::init(n, seed);
-    let mut solved: Vec<usize> = vec![0; n2];
+    let (sol, removed) = Solver::solve(n, n_empty, seed);
+
+    let mut init_grid: Vec<usize> = vec![0; n2];
+    let mut solution: Vec<usize> = vec![0; n2];
 
     // Translate matrix row # into position + value
-    for row_idx in sol.solution {
-        let row_idx = (row_idx - (4 * n2 + 1)) / 4;
-        solved[row_idx % n2] = row_idx / n2 + 1;
+    for row_idx in sol {
+        let dist_from_col = (row_idx - (4 * n2 + 1)) / 4;
+        let value = dist_from_col / n2 + 1;
+
+        init_grid[dist_from_col % n2] = if removed.contains(&row_idx) { 0 } else { value };
+        solution[dist_from_col % n2] = value;
     }
 
     Some(FinalSudokuBoard {
-        init_grid: vec![1; 81],
-        solved_grid: solved,
+        init_grid,
+        solution,
     })
 }

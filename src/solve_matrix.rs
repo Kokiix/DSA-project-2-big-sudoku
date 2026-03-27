@@ -44,7 +44,6 @@ pub struct Solver {
     matrix: Vec<Node>,
     pub solution: Vec<usize>,
     pub removed: Vec<usize>,
-    n_to_remove: u32,
     root: usize,
     n: u32,
     rng_state: u32,
@@ -54,11 +53,16 @@ pub struct Solver {
 }
 
 impl Solver {
-    pub fn init(n: u32, seed: usize) -> Self {
+    pub fn solve(n: u32, n_empty: u32, seed: usize) -> (Vec<usize>, Vec<usize>) {
+        // Populate solution vector
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
         s.rng_state = if seed == 0 { 1 } else { seed as u32 };
         s.find_solution_branch();
-        return s;
+
+        // Reset, then begin removing cells
+        s.matrix = s.blank_matrix;
+
+        return (s.solution, s.removed);
     }
 
     fn init_matrix(n: u32) -> Self {
@@ -123,7 +127,6 @@ impl Solver {
 
             solution: solution.clone(),
             removed: solution,
-            n_to_remove: 0,
 
             root: root_idx as usize,
             n,
