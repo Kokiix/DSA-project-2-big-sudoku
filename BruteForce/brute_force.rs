@@ -50,11 +50,14 @@ impl Solver {
     fn getBoxIndex(&self, row: usize, col: usize) -> usize {
         (row / self.subgrid) * self.subgrid + (col / self.subgrid)
     }
+    /*Checks if placing a number at the given position is valid according to Sudoku rules.
+    Returns true if the number can be placed, false otherwise. */
     fn valid_place(&self, row: usize, col: usize, num: u8) -> bool {
         let val = 1u64 << (num - 1);
         let box_index = self.getBoxIndex(row, col);
         (self.row_used[row] & val) == 0 && (self.col_used[col] & val) == 0 && (self.box_used[box_index] & val) == 0
     }
+    /*Places a number at the given position and updates the constraints. */
     fn place(&mut self, row: usize, col: usize, num: u8) {
         self.board[row][col] = num;
         let val = 1u64 << (num - 1);
@@ -63,6 +66,8 @@ impl Solver {
         let box_index = self.getBoxIndex(row, col);
         self.box_used[box_index] |= val;
     }
+    /*Removes a number from the given position and updates the constraints.
+    */
     fn remove(&mut self, row: usize, col: usize, num: u8) {
         self.board[row][col] = 0;
         let val = 1u64 << (num - 1);
@@ -71,6 +76,8 @@ impl Solver {
         let box_index = self.getBoxIndex(row, col); 
         self.box_used[box_index] &= !val;
     }
+    /*Counts the number of valid placements for a given cell.
+    Returns the count of valid numbers that can be placed in the cell. */
     fn count_paths(&self, row: usize, col: usize) -> usize {
         if self.board[row][col] != 0 {
             return 0;
@@ -109,6 +116,9 @@ impl Solver {
         }
         (found, best_row, best_col)
     }
+    /*Fills cells with only one valid placement until no more such cells exist.
+    Returns true if successful, false if a no path is found. This approach is outlined here
+    https://norvig.com/sudoku.html */
     fn fill_cell(&mut self) -> bool {
         let mut change = true;
         while change {
