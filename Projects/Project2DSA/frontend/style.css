@@ -79,7 +79,7 @@ select {
     padding: 0.5rem 1rem;
     cursor: pointer;
     outline: none;
-    transition: border-color 0.2s;
+    
 }
 
 select:hover {
@@ -104,7 +104,6 @@ select:focus {
     font-family: var(--font-display);
     font-size: 0.9rem;
     cursor: pointer;
-    transition: background-color 0.2s, transform 0.1s;
 }
 
 .btn:active {
@@ -130,6 +129,23 @@ select:focus {
     color: var(--text);
     border-color: var(--text-muted);
 }
+/* Percentage Input textbox */
+
+input[type="text"] {
+    background-color: var(--surface);
+    color: var(--text);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    outline: none;
+}
+
+input[type="text"]::placeholder{
+    color: white;
+}
+
 
 /*  Expand button   */
 .expand_bar{

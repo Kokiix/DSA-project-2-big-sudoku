@@ -5,12 +5,45 @@ const output = document.getElementById('output');
 const countLbl = document.getElementById('countLbl');
 const expandBtn = document.getElementById('expandBtn');
 const sizeSelect = document.getElementById('sizeSelect');
+const userPercentage = document.getElementById('userPercentage');
+const generateBtn = document.getElementById('generateBtn');
+
 
 let count = 0;
 
  //https://www.w3schools.com/jsref/prop_html_innerhtml.asp
  //https://www.w3schools.com/html/html_scripts.asp 
  //https://stackoverflow.com/questions/63755989/how-to-link-html-css-and-js-together 
+
+//Generate button
+//Once values are selected in dropdown and percent textbox,
+//create puzzles
+generateBtn.addEventListener('click', () =>{
+    const size = parseInt(sizeSelect.value);
+    if (size === 0) {
+        return;
+    }
+
+    const missingPercent = parseFloat(userPercentage.value);
+    if (isNaN(missingPercent)) {
+        return;
+    }
+
+    const board = getMockBoard(size, missingPercent);
+
+    let html = '<table class="sudoku-table">';
+    for (let row of board) {
+        html += '<tr>';
+        for (let cell of row) {
+            html += `<td>${cell}</td>`;
+        }
+        html += '</tr>';
+    }
+    html += '</table>';
+
+    output.innerHTML = html;
+})
+
 
  //DLX button
  //Runs DLX algorithm on puzzle in output box
@@ -34,10 +67,10 @@ runBruteBtn.addEventListener('click', () => {
 //Reset Button
 //Resets all values to default
 resetBtn.addEventListener('click', () => {
-    output.innerHTML = '<p class="placeholder">Nothing here yet...</p>';
     countLbl.textContent = '';
     count = 0;
     sizeSelect.value = '0';
+    userPercentage.value = 'Enter percentage';
 });
 
 //Expand button
@@ -53,33 +86,15 @@ expandBtn.addEventListener('click', ()=> {
 
 });
 
-//Size drop down menu
-//Loads sodoku puzzle into the output box
-sizeSelect.addEventListener('change', () => {
-    const size = parseInt(sizeSelect.value);
-    const board = getMockBoard(size);
-
-    let html = '<table class="sudoku-table">';
-    for (let row of board) {
-        html += '<tr>';
-        for (let cell of row) {
-            html += `<td>${cell}</td>`;
-        }
-        html += '</tr>';
-    }
-    html += '</table>';
-
-    output.innerHTML = html;
-})
-
 
 // Fake data that mimics what generate_sudoku() will return
-function getMockBoard(size) {
+function getMockBoard(size, missingPercent) {
     const board = [];
     for (let row = 0; row < size; row++) {
         const currentRow = [];
         for (let col = 0; col < size; col++) {
-            currentRow.push(Math.floor(Math.random() * size) + 1);  // random numbers 1 to size
+            const isMissing = Math.random() * 100 < missingPercent;  // randomly blank cell
+            currentRow.push(isMissing ? '' : Math.floor(Math.random() * size) + 1);
         }
         board.push(currentRow);
     }
