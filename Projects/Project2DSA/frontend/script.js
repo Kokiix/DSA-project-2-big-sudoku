@@ -7,7 +7,7 @@ const expandBtn = document.getElementById('expandBtn');
 const sizeSelect = document.getElementById('sizeSelect');
 const userPercentage = document.getElementById('userPercentage');
 const generateBtn = document.getElementById('generateBtn');
-
+const runControls = document.getElementById('runControls');
 
 let count = 0;
 
@@ -25,23 +25,13 @@ generateBtn.addEventListener('click', () =>{
     }
 
     const missingPercent = parseFloat(userPercentage.value);
+
     if (isNaN(missingPercent)) {
         return;
     }
 
-    const board = getMockBoard(size, missingPercent);
-
-    let html = '<table class="sudoku-table">';
-    for (let row of board) {
-        html += '<tr>';
-        for (let cell of row) {
-            html += `<td>${cell}</td>`;
-        }
-        html += '</tr>';
-    }
-    html += '</table>';
-
-    output.innerHTML = html;
+   generateBoard(size,missingPercent);
+   runControls.classList.remove('hidden');
 })
 
 
@@ -50,7 +40,6 @@ generateBtn.addEventListener('click', () =>{
 runDlxBtn.addEventListener('click', () => {
     const size = parseInt(sizeSelect.value);
     count += 1;
-    output.innerHTML = 'Running ' + size;
     countLbl.textContent = 'Clicked ' + count + ' times.'
    
 });
@@ -60,17 +49,23 @@ runDlxBtn.addEventListener('click', () => {
 runBruteBtn.addEventListener('click', () => {
     const size = parseInt(sizeSelect.value);
     count += 1;
-    output.innerHTML = 'Running ' + size;
     countLbl.textContent = 'Clicked ' + count + ' times.'
 });
 
 //Reset Button
-//Resets all values to default
+//Resets all values and buttons to default
 resetBtn.addEventListener('click', () => {
+    output.style.display = 'block';
+    output.style.gridTemplateColumns = '';
+    output.style.padding = '1.5rem';
     countLbl.textContent = '';
+    output.innerHTML = '';
     count = 0;
     sizeSelect.value = '0';
-    userPercentage.value = 'Enter percentage';
+    userPercentage.value = '';
+    runControls.classList.add('hidden');
+    output.classList.remove('expanded');
+    expandBtn.textContent = 'Expand All';
 });
 
 //Expand button
@@ -79,28 +74,28 @@ expandBtn.addEventListener('click', ()=> {
     output.classList.toggle('expanded');
     if(output.classList.contains('expanded')){
         expandBtn.textContent = 'Collapse';
-
     } else{
         expandBtn.textContent = 'Expand All';
     }
 
 });
 
+function generateBoard(size, missingPercent) {
+    output.style.display = 'grid';
+    output.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+    output.style.padding = '0';
+    output.innerHTML = '';
 
-// Fake data that mimics what generate_sudoku() will return
-function getMockBoard(size, missingPercent) {
-    const board = [];
     for (let row = 0; row < size; row++) {
-        const currentRow = [];
         for (let col = 0; col < size; col++) {
-            const isMissing = Math.random() * 100 < missingPercent;  // randomly blank cell
-            currentRow.push(isMissing ? '' : Math.floor(Math.random() * size) + 1);
+            const isMissing = Math.random() * 100 < missingPercent;
+            const cell = document.createElement('div');
+            cell.classList.add('grid-cell');
+            cell.textContent = isMissing ? '' : Math.floor(Math.random() * size) + 1;
+            output.appendChild(cell);
         }
-        board.push(currentRow);
     }
-    return board;
 }
-
 
 
 // import init, { generate_sudoku } from './bigSodoku.js';

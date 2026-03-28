@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DSA Project</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-<!-- Fonts -->
-<!-- https://developers.google.com/fonts/docs/getting_started -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Sudoku Solver</title>
+    <!-- Google fonts: https://developers.google.com/fonts/docs/getting_started -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 
 
 <!-- https://www.w3schools.com/html/html_classes.asp -->
@@ -17,9 +16,9 @@
 </head>
 <body>
 
-  <div class="container">
+    <div class="container">
 
-    <!-- Header -->
+        <!-- Header -->
     <header>
         <h1 class="title">Really Big Sudoku Solver</h1>
         <p class="subtitle">Solving Sudoku with the Dancing Links Algorithm (DLX)</p>
@@ -43,24 +42,25 @@
             <option value="144">144 x 144</option>
             <option value="169">169 x 169</option> -->
         </select>
-        <label class="select-label" for="userInput">% of Puzzle Unsolved</label>
+        <label class="select-label" for="userPercentage">% of Puzzle Unsolved</label>
         <input type= "text" id= "userPercentage" placeholder="Enter percentage">
-        <button class = "btn btn-primary" id="generateBtn"> Generate</button>
-        
+        <button class = "btn btn-primary" id="generateBtn"> Generate</button>  
     </section>
+
     <!-- Control Buttons -->
-    <section class="controls">
-        <button class="btn btn-primary" id ="runDlxBtn">Run DLX</button>
-        <button class = "btn btn-primary" id ="runBruteBtn">Run Brute Force</button>
-        <button class="btn btn-secondary" id ="resetBtn">Reset</button>
+    <section class="hidden controls" id="runControls">
+        <button class="btn btn-primary" id="runDlxBtn">Run DLX</button>
+        <button class="btn btn-primary" id="runBruteBtn">Run Brute Force</button>
+        <button class="btn btn-secondary" id="resetBtn">Reset</button>
     </section>
+
     <!-- Count Label -->
     <label id="countLbl"></label>
     
 
     <!-- Expand Bar -->
     <section class = "expand_bar">
-        <button class="btn-secondary" id ="expandBtn">Expand All</button>
+        <button class="btn btn-secondary" id ="expandBtn">Expand All</button>
     </section>
    
     <!-- Output Display -->
@@ -68,8 +68,8 @@
     <section class="output-box" id ="output">
     </section>
 
-  </div>
+    </div>
 
-  <script type="module" src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

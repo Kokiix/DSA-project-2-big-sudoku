@@ -1,5 +1,4 @@
 /* https://www.w3schools.com/cssref/sel_root.php  */
-
 :root {
     --bg: #171c29;
     --surface: #1a1d27;
@@ -160,9 +159,7 @@ input[type="text"]::placeholder{
     color: var(--text-muted);
     font-family: var(--font-display);
     font-size: 0.85rem;
-    cursor: pointer;
     padding: 0;
-    text-decoration: none;
 }
 
 #expandBtn:hover {
@@ -206,17 +203,17 @@ input[type="text"]::placeholder{
     text-align: center;
     margin-top: 4rem;
 }
-/* Sodoku puzzle in output box */
-.sudoku-table {
-    border-collapse: collapse;
+
+.grid-cell {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--text-muted); 
     font-size: 0.75rem;
-    margin: 0 auto;
+    color: var(--text);
 }
 
-.sudoku-table td {
-    width: 24px;
-    height: 24px;
-    text-align: center;
-    border: 1px solid var(--border);
-    color: var(--text);
+.hidden{
+    display: none;
 }
