@@ -6,7 +6,6 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::solve_matrix::{Node, Solver};
 
-// TODO: implement methods here so that JS doesn't have to extract?
 #[wasm_bindgen]
 pub struct FinalSudokuBoard {
     // Has 0s in place of empty cells
@@ -24,10 +23,9 @@ pub fn generate_sudoku(n: u32, n_empty: f32, seed: usize) -> Option<FinalSudokuB
     let n2 = n.pow(2) as usize;
     let (sol, removed, n_removed) = Solver::solve(n, n_empty, seed);
 
+    // Translate row # into position + value
     let mut init_grid: Vec<usize> = vec![0; n2];
     let mut solution: Vec<usize> = vec![0; n2];
-
-    // Translate matrix row # into position + value
     for row_idx in sol {
         let dist_from_col = (row_idx - (4 * n2 + 1)) / 4;
         let value = dist_from_col / n2 + 1;

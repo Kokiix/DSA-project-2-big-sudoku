@@ -1,16 +1,14 @@
 /*!
  * Create a circular doubly linked list to represent all states of the given board size, then recursively traverse the list to solve the matrix.
  *
- * Returns a list of node indices, to be decoded using the below, though the implementation should only ever live in lib.rs.
- *
- * Seed range = 0 to 4,294,967,295 (u32 max)
+ * Returns a list of node indices, to be decoded using the below, though the implementation should only ever live in lib.rs
  *
  * # Matrix Structure
  * ## In Theory:
  * Rows: (all the ways the n values fit into n^2 grid) = n * n^2 = n^3, + 1 row for column objects
  * Columns: Each column falls into 1 of 4 constraint types: existence, row, col, subgrid.
  * For example, there could be a column that represents the constraint that a solution must have some number in (0, 0).
- * From this, you should be able to discern that each column has n values, but only 1 may be present in any given solution.
+ * Therefore, each column has n values, but only 1 may be present in any given solution.
  *
  * ## In Implementation:
  * The rows are laid out end to end in a Vec of size 4(n^3 + 1).
@@ -42,8 +40,8 @@ pub struct Node {
 #[derive(Clone)]
 pub struct Solver {
     matrix: Vec<Node>,
-    pub solution: Vec<usize>,
-    pub removed: Vec<usize>,
+    solution: Vec<usize>,
+    removed: Vec<usize>,
     root: usize,
     n: u32,
     rng_state: u32,
@@ -53,50 +51,20 @@ pub struct Solver {
 }
 
 impl Solver {
+    /// The randomization is based on 32 bit xorshift, so seed must be 32 bit
     pub fn solve(
         n: u32,
         n_to_remove_proportion: f32,
         seed: usize,
     ) -> (Vec<usize>, Vec<usize>, u32) {
-        // Populate solution vector
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
         let orig_matrix = s.matrix.clone();
         s.rng_state = if seed == 0 { 1 } else { seed as u32 };
         s.find_solution_branch();
         s.initialized = true;
 
-        let mut n_removed = 0;
-        let mut to_remove = s.solution.clone();
+        let n_removed = s.remove_cells(n_to_remove_proportion, orig_matrix);
 
-        let mut cell_removed = true;
-        let n_to_remove = (n_to_remove_proportion * n.pow(2) as f32) as u32;
-        while n_removed < n_to_remove && cell_removed {
-            cell_removed = false;
-            let mut next: Vec<usize> = Vec::new();
-            for cell_to_be_removed in &to_remove {
-                s.matrix = orig_matrix.clone();
-                for cell in s.solution.clone() {
-                    if cell != *cell_to_be_removed && !s.removed.contains(&cell) {
-                        s.cover_col_and_rows(s.matrix[cell].column_obj as usize);
-                        s.cover_solution(cell);
-                    }
-                }
-
-                s.n_solutions = 0;
-                if s.find_solution_branch() {
-                    n_removed += 1;
-                    s.removed.push(*cell_to_be_removed);
-                    cell_removed = true;
-                } else {
-                    next.push(*cell_to_be_removed);
-                }
-
-                if n_removed == n_to_remove {
-                    break;
-                }
-            }
-            to_remove = next;
-        }
         return (s.solution, s.removed, n_removed);
     }
 
@@ -250,6 +218,43 @@ impl Solver {
         self.uncover_col_and_rows(col_obj);
 
         return self.n_solutions == 1;
+    }
+
+    fn remove_cells(&mut self, n_to_remove_proportion: f32, orig_matrix: Vec<Node>) -> u32 {
+        let mut n_removed = 0;
+        let mut to_remove = self.solution.clone();
+
+        let mut cell_removed = true;
+        let n_to_remove = (n_to_remove_proportion * self.n.pow(2) as f32) as u32;
+        while n_removed < n_to_remove && cell_removed {
+            cell_removed = false;
+            let mut next: Vec<usize> = Vec::new();
+            for cell_to_be_removed in &to_remove {
+                self.matrix = orig_matrix.clone();
+                for cell in self.solution.clone() {
+                    if cell != *cell_to_be_removed && !self.removed.contains(&cell) {
+                        self.cover_col_and_rows(self.matrix[cell].column_obj as usize);
+                        self.cover_solution(cell);
+                    }
+                }
+
+                self.n_solutions = 0;
+                if self.find_solution_branch() {
+                    n_removed += 1;
+                    self.removed.push(*cell_to_be_removed);
+                    cell_removed = true;
+                } else {
+                    next.push(*cell_to_be_removed);
+                }
+
+                if n_removed == n_to_remove {
+                    break;
+                }
+            }
+            to_remove = next;
+        }
+
+        return n_removed;
     }
 }
 
