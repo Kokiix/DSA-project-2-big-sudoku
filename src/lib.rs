@@ -1,4 +1,5 @@
 mod solve_matrix;
+#[cfg(test)]
 mod tests;
 
 use wasm_bindgen::prelude::wasm_bindgen;
