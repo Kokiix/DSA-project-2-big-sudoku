@@ -69,7 +69,7 @@ impl Solver {
         return (s.solution, s.removed, n_removed);
     }
 
-    fn init_matrix(n: u32) -> Self {
+    pub fn init_matrix(n: u32) -> Self {
         let mut matrix = Vec::with_capacity(((n.pow(3) + 1) * 4) as usize);
         let n2 = n.pow(2);
         let root_idx = 4 * n2;
@@ -141,7 +141,7 @@ impl Solver {
     }
 
     /// Recursively search for solution. Returning false = fail on this recursive branch, true = matrix solved, short circuiting
-    fn find_solution_branch(&mut self) -> bool {
+    pub fn find_solution_branch(&mut self) -> bool {
         let root = self.root;
         if self.matrix[root].right == root as u32 {
             self.n_solutions += 1;
@@ -369,5 +369,14 @@ impl Solver {
         rng ^= rng << 5;
         self.rng_state = rng;
         return rng;
+    }
+
+    pub fn insert_sol_row(&mut self, row: usize) {
+        self.solution.push(row);
+        self.cover_solution(row);
+    }
+
+    pub fn get_sol(self) -> Vec<usize> {
+        return self.solution;
     }
 }
