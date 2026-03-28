@@ -15,6 +15,19 @@ pub struct FinalSudokuBoard {
 }
 
 #[wasm_bindgen]
+impl FinalSudokuBoard {
+    #[wasm_bindgen(getter)]
+    pub fn init_grid(&self) -> Vec<usize> {
+        self.init_grid.clone()
+    }
+
+    #[wasm_bindgen(getter)]
+    pub fn solution(&self) -> Vec<usize> {
+        self.solution.clone()
+    }
+}
+
+#[wasm_bindgen]
 pub fn generate_sudoku(n: u32, n_empty: f32, seed: usize) -> Option<FinalSudokuBoard> {
     if n.isqrt().pow(2) != n {
         return None;
