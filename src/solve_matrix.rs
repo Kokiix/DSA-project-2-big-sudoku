@@ -52,7 +52,7 @@ pub struct Solver {
 }
 
 impl Solver {
-    pub fn solve(n: u32, n_to_remove: u32, seed: usize) -> (Vec<usize>, Vec<usize>) {
+    pub fn solve(n: u32, n_to_remove: u32, seed: usize) -> (Vec<usize>, Vec<usize>, u32) {
         // Populate solution vector
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
         let orig_matrix = s.matrix.clone();
@@ -60,16 +60,17 @@ impl Solver {
         s.find_solution_branch();
         s.initialized = true;
 
-        let mut removed = 0;
+        let mut n_removed = 0;
         let mut to_remove = s.solution.clone();
+
         let mut cell_removed = true;
-        while removed < n_to_remove && cell_removed {
+        while n_removed < n_to_remove && cell_removed {
             cell_removed = false;
             let mut next: Vec<usize> = Vec::new();
             for cell_to_be_removed in &to_remove {
                 s.matrix = orig_matrix.clone();
                 for cell in s.solution.clone() {
-                    if cell != *cell_to_be_removed {
+                    if cell != *cell_to_be_removed && !s.removed.contains(&cell) {
                         s.cover_col_and_rows(s.matrix[cell].column_obj as usize);
                         s.cover_solution(cell);
                     }
@@ -77,20 +78,20 @@ impl Solver {
 
                 s.n_solutions = 0;
                 if s.find_solution_branch() {
-                    removed += 1;
+                    n_removed += 1;
                     s.removed.push(*cell_to_be_removed);
                     cell_removed = true;
                 } else {
                     next.push(*cell_to_be_removed);
                 }
 
-                if removed == n_to_remove {
+                if n_removed == n_to_remove {
                     break;
                 }
             }
             to_remove = next;
         }
-        return (s.solution, s.removed);
+        return (s.solution, s.removed, n_removed);
     }
 
     fn init_matrix(n: u32) -> Self {
@@ -167,6 +168,7 @@ impl Solver {
     fn find_solution_branch(&mut self) -> bool {
         let root = self.root;
         if self.matrix[root].right == root as u32 {
+            self.n_solutions += 1;
             return true;
         }
 
@@ -218,11 +220,8 @@ impl Solver {
             self.cover_solution(row);
 
             // Continue recursion
-            if self.find_solution_branch() {
-                if !self.initialized {
-                    return true;
-                }
-                self.n_solutions += 1;
+            if self.find_solution_branch() && !self.initialized {
+                return true;
             }
 
             // Reverse of self.cover_solution();

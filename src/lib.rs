@@ -11,7 +11,7 @@ pub struct FinalSudokuBoard {
     // Has 0s in place of empty cells
     init_grid: Vec<usize>,
     solution: Vec<usize>,
-    n_empty: u32,
+    n_removed: u32,
 }
 
 #[wasm_bindgen]
@@ -21,7 +21,7 @@ pub fn generate_sudoku(n: u32, n_empty: u32, seed: usize) -> Option<FinalSudokuB
     }
 
     let n2 = n.pow(2) as usize;
-    let (sol, removed) = Solver::solve(n, n_empty, seed);
+    let (sol, removed, n_removed) = Solver::solve(n, n_empty, seed);
 
     let mut init_grid: Vec<usize> = vec![0; n2];
     let mut solution: Vec<usize> = vec![0; n2];
@@ -38,6 +38,6 @@ pub fn generate_sudoku(n: u32, n_empty: u32, seed: usize) -> Option<FinalSudokuB
     Some(FinalSudokuBoard {
         init_grid,
         solution,
-        n_empty,
+        n_removed,
     })
 }

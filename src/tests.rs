@@ -3,14 +3,24 @@ use crate::{generate_sudoku, solve_matrix::Solver};
 #[test]
 fn print_solved() {
     let size = 36;
-    let grid = generate_sudoku(size as u32, 10, 12346).unwrap().init_grid;
-    for (i, n) in grid.iter().enumerate() {
+    let sol = generate_sudoku(size as u32, 648, 12346).unwrap();
+    let init = sol.init_grid;
+    for (i, n) in init.iter().enumerate() {
         if i % size == 0 {
             print!("\n");
         }
         print!("{n} ");
     }
-    print!("\n");
+
+    // let solved = sol.solution;
+    // for (i, n) in solved.iter().enumerate() {
+    //     if i % size == 0 {
+    //         print!("\n");
+    //     }
+    //     print!("{n} ");
+    // }
+    let a = sol.n_removed;
+    println!("\nCells Removed: {a}");
 }
 
 // #[test]
