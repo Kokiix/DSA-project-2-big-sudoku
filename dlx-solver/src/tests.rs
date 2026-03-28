@@ -1,4 +1,4 @@
-use crate::generate_sudoku;
+use crate::{generate_sudoku, solve_sudoku};
 
 #[test]
 fn print_solved() {
@@ -18,6 +18,6 @@ fn print_solved() {
         print!("{n} ");
     }
 
-    let a = sol.n_removed;
-    println!("\nCells Removed: {a}");
+    let sol_attempt = solve_sudoku(size as u32, init);
+    assert!(sol_attempt == sol.solution);
 }
