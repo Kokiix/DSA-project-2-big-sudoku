@@ -1,0 +1,10 @@
+[package]
+name = "DSA-project-2-big-sudoku"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[[bin]]
+name = "DSA-project-2-big-sudoku"
+path = "main.rs"
