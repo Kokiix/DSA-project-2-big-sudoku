@@ -18,15 +18,35 @@ export class FinalSudokuBoard {
         const ptr = this.__destroy_into_raw();
         wasm.__wbg_finalsudokuboard_free(ptr, 0);
     }
+    /**
+     * @returns {Uint32Array}
+     */
+    get init_grid() {
+        const ret = wasm.finalsudokuboard_init_grid(this.__wbg_ptr);
+        var v1 = getArrayU32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
+    /**
+     * @returns {Uint32Array}
+     */
+    get solution() {
+        const ret = wasm.finalsudokuboard_solution(this.__wbg_ptr);
+        var v1 = getArrayU32FromWasm0(ret[0], ret[1]).slice();
+        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+        return v1;
+    }
 }
 if (Symbol.dispose) FinalSudokuBoard.prototype[Symbol.dispose] = FinalSudokuBoard.prototype.free;
 
 /**
- * @param {number} input_sudoku_size
+ * @param {number} n
+ * @param {number} n_empty
+ * @param {number} seed
  * @returns {FinalSudokuBoard | undefined}
  */
-export function generate_sudoku(input_sudoku_size) {
-    const ret = wasm.generate_sudoku(input_sudoku_size);
+export function generate_sudoku(n, n_empty, seed) {
+    const ret = wasm.generate_sudoku(n, n_empty, seed);
     return ret === 0 ? undefined : FinalSudokuBoard.__wrap(ret);
 }
 
@@ -56,9 +76,22 @@ const FinalSudokuBoardFinalization = (typeof FinalizationRegistry === 'undefined
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_finalsudokuboard_free(ptr >>> 0, 1));
 
+function getArrayU32FromWasm0(ptr, len) {
+    ptr = ptr >>> 0;
+    return getUint32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
+}
+
 function getStringFromWasm0(ptr, len) {
     ptr = ptr >>> 0;
     return decodeText(ptr, len);
+}
+
+let cachedUint32ArrayMemory0 = null;
+function getUint32ArrayMemory0() {
+    if (cachedUint32ArrayMemory0 === null || cachedUint32ArrayMemory0.byteLength === 0) {
+        cachedUint32ArrayMemory0 = new Uint32Array(wasm.memory.buffer);
+    }
+    return cachedUint32ArrayMemory0;
 }
 
 let cachedUint8ArrayMemory0 = null;
@@ -87,6 +120,7 @@ let wasmModule, wasm;
 function __wbg_finalize_init(instance, module) {
     wasm = instance.exports;
     wasmModule = module;
+    cachedUint32ArrayMemory0 = null;
     cachedUint8ArrayMemory0 = null;
     wasm.__wbindgen_start();
     return wasm;
