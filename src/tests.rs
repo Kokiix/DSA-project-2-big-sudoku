@@ -3,7 +3,7 @@ use crate::{generate_sudoku, solve_matrix::Solver};
 #[test]
 fn print_solved() {
     let size = 36;
-    let sol = generate_sudoku(size as u32, 648, 12346).unwrap();
+    let sol = generate_sudoku(size as u32, 0.3, 1).unwrap();
     let init = sol.init_grid;
     for (i, n) in init.iter().enumerate() {
         if i % size == 0 {

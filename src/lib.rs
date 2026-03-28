@@ -15,7 +15,7 @@ pub struct FinalSudokuBoard {
 }
 
 #[wasm_bindgen]
-pub fn generate_sudoku(n: u32, n_empty: u32, seed: usize) -> Option<FinalSudokuBoard> {
+pub fn generate_sudoku(n: u32, n_empty: f32, seed: usize) -> Option<FinalSudokuBoard> {
     if n.isqrt().pow(2) != n {
         return None;
     }

@@ -3,6 +3,7 @@
  *
  * Returns a list of node indices, to be decoded using the below, though the implementation should only ever live in lib.rs.
  *
+ * Seed range = 0 to 4,294,967,295 (u32 max)
  *
  * # Matrix Structure
  * ## In Theory:
@@ -52,7 +53,11 @@ pub struct Solver {
 }
 
 impl Solver {
-    pub fn solve(n: u32, n_to_remove: u32, seed: usize) -> (Vec<usize>, Vec<usize>, u32) {
+    pub fn solve(
+        n: u32,
+        n_to_remove_proportion: f32,
+        seed: usize,
+    ) -> (Vec<usize>, Vec<usize>, u32) {
         // Populate solution vector
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
         let orig_matrix = s.matrix.clone();
@@ -64,6 +69,7 @@ impl Solver {
         let mut to_remove = s.solution.clone();
 
         let mut cell_removed = true;
+        let n_to_remove = (n_to_remove_proportion * n.pow(2) as f32) as u32;
         while n_removed < n_to_remove && cell_removed {
             cell_removed = false;
             let mut next: Vec<usize> = Vec::new();
@@ -178,6 +184,9 @@ impl Solver {
         let mut min_size = self.n;
         while col_traverse != root {
             if let Some(size) = self.matrix[col_traverse].column_size {
+                if size == 0 {
+                    return false;
+                }
                 if size < min_size {
                     col_obj = col_traverse;
                     min_size = size;
