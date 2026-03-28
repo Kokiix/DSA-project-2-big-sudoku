@@ -7,12 +7,16 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 // Kenneth section
 
-// WASM doesn't support nested vectors, so everything has to be compressed to 1D
+// WASM doesn't support nested vectors
 #[wasm_bindgen]
 pub fn solve(size: usize, board_1d: Vec<u8>) -> Vec<u8> {
-    let mut puzzle = Sudoku::new(size);
+    let board_2d = board_1d.chunks(size).map(|chunk| chunk.to_vec()).collect();
 
-    return board;
+    let mut puzzle = Sudoku::new(size);
+    puzzle.board = board_2d;
+    let mut solver = Solver::new(puzzle);
+    solver.solve();
+    return solver.board.into_iter().flatten().collect();
 }
 
 // Chase's stuff
