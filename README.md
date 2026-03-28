@@ -1,5 +1,5 @@
 # Big Sudoku
-<description here>
+{description here}
 
   
 ## Running the 2 Algorithms Separately
@@ -12,4 +12,4 @@ cargo test --release -- --nocapture
 Change the Sudoku grid size, fill %, and seed, in `dlx-solver/src/tests.rs`
 
 ### Brute force Generator
-<instructions here>
+{instructions here}
