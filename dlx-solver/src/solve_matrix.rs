@@ -25,25 +25,31 @@
  * Ex: (1 in (0, 0)), (1 in (1, 0))...(2 in (0, 0)), (2 in (1, 0))...etc
 !*/
 
+use wasm_bindgen::prelude::wasm_bindgen;
+
 // u16 is too small; max square sudoku size is ~144
 // TODO: prove the above in a comment?
 #[derive(Clone)]
-pub struct Node {
-    pub column_obj: u32,
-    pub up: u32,
-    pub down: u32,
-    pub right: u32,
-    pub left: u32,
-    pub column_size: Option<u32>,
+struct Node {
+    column_obj: u32,
+    up: u32,
+    down: u32,
+    right: u32,
+    left: u32,
+    column_size: Option<u32>,
 }
 
 #[derive(Clone)]
+#[wasm_bindgen]
 pub struct Solver {
+    blank_matrix: Vec<Node>,
     matrix: Vec<Node>,
-    solution: Vec<usize>,
-    removed: Vec<usize>,
+    #[wasm_bindgen(getter_with_clone)]
+    pub solution: Vec<usize>,
+    #[wasm_bindgen(getter_with_clone)]
+    pub removed: Vec<usize>,
     root: usize,
-    n: u32,
+    pub n: u32,
     rng_state: u32,
 
     initialized: bool,
@@ -52,20 +58,13 @@ pub struct Solver {
 
 impl Solver {
     /// The randomization is based on 32 bit xorshift, so seed must be 32 bit
-    pub fn solve(
-        n: u32,
-        n_to_remove_proportion: f32,
-        seed: usize,
-    ) -> (Vec<usize>, Vec<usize>, u32) {
+    pub fn new(n: u32, seed: usize) -> Solver {
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
-        let orig_matrix = s.matrix.clone();
+        s.blank_matrix = s.matrix.clone();
         s.rng_state = if seed == 0 { 1 } else { seed as u32 };
         s.find_solution_branch();
         s.initialized = true;
-
-        let n_removed = s.remove_cells(n_to_remove_proportion, orig_matrix);
-
-        return (s.solution, s.removed, n_removed);
+        return s;
     }
 
     fn init_matrix(n: u32) -> Self {
@@ -125,6 +124,7 @@ impl Solver {
 
         let solution: Vec<usize> = Vec::with_capacity(n2 as usize);
         Solver {
+            blank_matrix: matrix.clone(),
             matrix,
 
             solution: solution.clone(),
@@ -220,7 +220,7 @@ impl Solver {
         return self.n_solutions == 1;
     }
 
-    fn remove_cells(&mut self, n_to_remove_proportion: f32, orig_matrix: Vec<Node>) -> u32 {
+    pub fn remove_cells(&mut self, n_to_remove_proportion: f32) -> u32 {
         let mut n_removed = 0;
         let mut to_remove = self.solution.clone();
 
@@ -230,7 +230,7 @@ impl Solver {
             cell_removed = false;
             let mut next: Vec<usize> = Vec::new();
             for cell_to_be_removed in &to_remove {
-                self.matrix = orig_matrix.clone();
+                self.matrix = self.blank_matrix.clone();
                 for cell in self.solution.clone() {
                     if cell != *cell_to_be_removed && !self.removed.contains(&cell) {
                         self.cover_col_and_rows(self.matrix[cell].column_obj as usize);

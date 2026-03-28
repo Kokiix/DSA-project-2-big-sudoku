@@ -4,7 +4,7 @@ mod tests;
 
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use crate::solve_matrix::{Node, Solver};
+use crate::solve_matrix::Solver;
 
 #[wasm_bindgen]
 pub struct FinalSudokuBoard {
@@ -28,13 +28,18 @@ impl FinalSudokuBoard {
 }
 
 #[wasm_bindgen]
-pub fn generate_sudoku(n: u32, n_empty: f32, seed: usize) -> Option<FinalSudokuBoard> {
-    if n.isqrt().pow(2) != n {
-        return None;
-    }
+/// n must be a square number
+pub fn generate_sudoku(n: u32, seed: usize) -> Solver {
+    Solver::new(n, seed)
+}
 
-    let n2 = n.pow(2) as usize;
-    let (sol, removed, n_removed) = Solver::solve(n, n_empty, seed);
+#[wasm_bindgen]
+pub fn solve_sudoku(mut s: Solver, proportion_empty: f32) -> FinalSudokuBoard {
+    let n2 = s.n.pow(2) as usize;
+
+    let n_removed = s.remove_cells(proportion_empty);
+    let sol = s.solution;
+    let removed = s.removed;
 
     // Translate row # into position + value
     let mut init_grid: Vec<usize> = vec![0; n2];
@@ -47,9 +52,9 @@ pub fn generate_sudoku(n: u32, n_empty: f32, seed: usize) -> Option<FinalSudokuB
         solution[dist_from_col % n2] = value;
     }
 
-    Some(FinalSudokuBoard {
+    FinalSudokuBoard {
         init_grid,
         solution,
         n_removed,
-    })
+    }
 }
