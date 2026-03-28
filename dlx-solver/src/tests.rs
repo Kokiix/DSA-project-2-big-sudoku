@@ -1,4 +1,4 @@
-use crate::{generate_sudoku, solve_sudoku};
+use crate::generate_sudoku;
 
 #[test]
 fn print_solved() {
@@ -9,7 +9,7 @@ fn print_solved() {
     let seed = 1;
     // ========================================================
 
-    let sol = solve_sudoku(generate_sudoku(size as u32, seed), remove_proportion);
+    let sol = generate_sudoku(size as u32, remove_proportion, seed);
     let init = sol.init_grid;
     for (i, n) in init.iter().enumerate() {
         if i % size == 0 {

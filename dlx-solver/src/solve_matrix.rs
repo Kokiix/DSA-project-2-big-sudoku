@@ -44,12 +44,10 @@ struct Node {
 pub struct Solver {
     blank_matrix: Vec<Node>,
     matrix: Vec<Node>,
-    #[wasm_bindgen(getter_with_clone)]
-    pub solution: Vec<usize>,
-    #[wasm_bindgen(getter_with_clone)]
-    pub removed: Vec<usize>,
+    solution: Vec<usize>,
+    removed: Vec<usize>,
     root: usize,
-    pub n: u32,
+    n: u32,
     rng_state: u32,
 
     initialized: bool,
@@ -58,13 +56,17 @@ pub struct Solver {
 
 impl Solver {
     /// The randomization is based on 32 bit xorshift, so seed must be 32 bit
-    pub fn new(n: u32, seed: usize) -> Solver {
+    pub fn generate(n: u32, remove_prop: f32, seed: usize) -> (Vec<usize>, Vec<usize>, u32) {
+        // Create final solution
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
         s.blank_matrix = s.matrix.clone();
         s.rng_state = if seed == 0 { 1 } else { seed as u32 };
         s.find_solution_branch();
         s.initialized = true;
-        return s;
+
+        // Punch holes in it
+        let n_removed = s.remove_cells(remove_prop);
+        return (s.solution, s.removed, n_removed);
     }
 
     fn init_matrix(n: u32) -> Self {

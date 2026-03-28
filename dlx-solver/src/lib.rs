@@ -29,17 +29,9 @@ impl FinalSudokuBoard {
 
 #[wasm_bindgen]
 /// n must be a square number
-pub fn generate_sudoku(n: u32, seed: usize) -> Solver {
-    Solver::new(n, seed)
-}
-
-#[wasm_bindgen]
-pub fn solve_sudoku(mut s: Solver, proportion_empty: f32) -> FinalSudokuBoard {
-    let n2 = s.n.pow(2) as usize;
-
-    let n_removed = s.remove_cells(proportion_empty);
-    let sol = s.solution;
-    let removed = s.removed;
+pub fn generate_sudoku(n: u32, proportion_empty: f32, seed: usize) -> FinalSudokuBoard {
+    let (sol, removed, n_removed) = Solver::generate(n, proportion_empty, seed);
+    let n2 = n.pow(2) as usize;
 
     // Translate row # into position + value
     let mut init_grid: Vec<usize> = vec![0; n2];
