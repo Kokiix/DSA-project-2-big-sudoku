@@ -1,0 +1,12 @@
+[package]
+name = "DSA-project-2-big-sudoku"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "brute_force_big_sudoku"
+path = "main.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
