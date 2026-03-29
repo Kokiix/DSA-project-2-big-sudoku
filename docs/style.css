@@ -149,8 +149,7 @@ input[type="text"]::placeholder{
 .output-box{
     width: 100%;
     min-height: 200px;
-    max-height: 800px;     
-    overflow: auto;    
+    overflow: visible;    
     background-color: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -191,11 +190,11 @@ input[type="text"]::placeholder{
     color: var(--text);
 }
 .grid-cell.thick-right {
-    border-right: 3px solid var(--text);
+    border-right: 5px solid var(--text);
 }
 
 .grid-cell.thick-bottom {
-    border-bottom: 3px solid var(--text);
+    border-bottom: 5px solid var(--text);
 }
 
 .hidden{
