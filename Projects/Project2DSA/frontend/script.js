@@ -1,5 +1,5 @@
-import init, { generate_sudoku, solve_sudoku} from '../DLX/big_sudoku.js';
-import initBrute, {solve} from '../BruteForce/brute_force_big_sudoku.js';
+import init, { generate_sudoku, solve_sudoku} from './DLX/big_sudoku.js';
+import initBrute, {solve} from './BruteForce/brute_force_big_sudoku.js';
 await init();
 await initBrute();
 
@@ -33,7 +33,9 @@ generateBtn.addEventListener('click', () =>{
 
     const missingPercent = parseFloat(userPercentage.value);
 
-    if (isNaN(missingPercent)) {
+    let num = Number(missingPercent);
+
+    if (isNaN(missingPercent) ||!Number.isInteger(num)) {
         return;
     }
 
