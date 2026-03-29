@@ -1,14 +1,14 @@
 /* @ts-self-types="./brute_force_big_sudoku.d.ts" */
 
 /**
- * @param {number} n
+ * @param {number} size
  * @param {Uint8Array} board_1d
  * @returns {Uint8Array}
  */
-export function solve(n, board_1d) {
+export function solve(size, board_1d) {
     const ptr0 = passArray8ToWasm0(board_1d, wasm.__wbindgen_malloc);
     const len0 = WASM_VECTOR_LEN;
-    const ret = wasm.solve(n, ptr0, len0);
+    const ret = wasm.solve(size, ptr0, len0);
     var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
     wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
     return v2;
