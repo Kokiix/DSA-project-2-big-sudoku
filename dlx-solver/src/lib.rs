@@ -57,6 +57,8 @@ pub fn solve_sudoku(n: u32, in_board: Vec<usize>) -> Vec<usize> {
         }
     }
 
+    s.first_sol_found = false;
+    s.n_solutions = 0;
     s.find_solution_branch();
     matrix_sol_into_sudoku_board(s.get_sol(), n2)
 }

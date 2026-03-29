@@ -10,7 +10,7 @@ fn print_solved() {
     // ========================================================
 
     let sol = generate_sudoku(size as u32, remove_proportion, seed);
-    let init = sol.init_grid;
+    let init = sol.init_grid.clone();
     for (i, n) in init.iter().enumerate() {
         if i % size == 0 {
             print!("\n");
@@ -21,5 +21,6 @@ fn print_solved() {
     let sol_attempt = solve_sudoku(size as u32, init);
     println!("Sol solution: {:?}", sol.solution);
     println!("Sol attempt:  {:?}", sol_attempt);
+    assert!(sol_attempt != sol.init_grid);
     assert!(sol_attempt == sol.solution);
 }

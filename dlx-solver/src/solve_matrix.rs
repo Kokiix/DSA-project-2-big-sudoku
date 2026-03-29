@@ -50,8 +50,8 @@ pub struct Solver {
     n: u32,
     rng_state: u32,
 
-    initialized: bool,
-    n_solutions: usize,
+    pub first_sol_found: bool,
+    pub n_solutions: usize,
 }
 
 impl Solver {
@@ -62,7 +62,7 @@ impl Solver {
         s.blank_matrix = s.matrix.clone();
         s.rng_state = if seed == 0 { 1 } else { seed as u32 };
         s.find_solution_branch();
-        s.initialized = true;
+        s.first_sol_found = true;
 
         // Punch holes in it
         let n_removed = s.remove_cells(remove_prop);
@@ -135,7 +135,7 @@ impl Solver {
             root: root_idx as usize,
             n,
             rng_state: 0,
-            initialized: false,
+            first_sol_found: false,
             n_solutions: 0,
         }
     }
@@ -199,7 +199,7 @@ impl Solver {
             self.cover_solution(row);
 
             // Continue recursion
-            if self.find_solution_branch() && !self.initialized {
+            if self.find_solution_branch() && !self.first_sol_found {
                 return true;
             }
 
@@ -264,7 +264,6 @@ impl Solver {
 impl Solver {
     fn cover_solution(&mut self, row: usize) {
         let mut row_subitem: usize = self.matrix[row].right as usize;
-        // Cover cols that this row satisfies, and eliminate some overlapping rows / answers
         while row_subitem != row {
             let j_col = self.matrix[row_subitem].column_obj as usize;
             self.cover_col_and_rows(j_col);
@@ -373,6 +372,7 @@ impl Solver {
 
     pub fn insert_sol_row(&mut self, row: usize) {
         self.solution.push(row);
+        self.cover_col_and_rows(self.matrix[row].column_obj as usize);
         self.cover_solution(row);
     }
 
