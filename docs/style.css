@@ -34,7 +34,7 @@ body {
 /*  Layout    */
 .container {
     width: 100%;
-    max-width: 720px;
+    max-width: 1080px;
     padding: 2rem;
     display: flex;
     flex-direction: column;
@@ -149,7 +149,7 @@ input[type="text"]::placeholder{
 .output-box{
     width: 100%;
     min-height: 200px;
-    max-height: 2000px;     
+    max-height: 800px;     
     overflow: auto;    
     background-color: var(--surface);
     border: 1px solid var(--border);
