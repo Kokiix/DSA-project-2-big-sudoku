@@ -25,20 +25,24 @@
  * Ex: (1 in (0, 0)), (1 in (1, 0))...(2 in (0, 0)), (2 in (1, 0))...etc
 !*/
 
+use wasm_bindgen::prelude::wasm_bindgen;
+
 // u16 is too small; max square sudoku size is ~144
 // TODO: prove the above in a comment?
 #[derive(Clone)]
-pub struct Node {
-    pub column_obj: u32,
-    pub up: u32,
-    pub down: u32,
-    pub right: u32,
-    pub left: u32,
-    pub column_size: Option<u32>,
+struct Node {
+    column_obj: u32,
+    up: u32,
+    down: u32,
+    right: u32,
+    left: u32,
+    column_size: Option<u32>,
 }
 
 #[derive(Clone)]
+#[wasm_bindgen]
 pub struct Solver {
+    blank_matrix: Vec<Node>,
     matrix: Vec<Node>,
     solution: Vec<usize>,
     removed: Vec<usize>,
@@ -46,29 +50,26 @@ pub struct Solver {
     n: u32,
     rng_state: u32,
 
-    initialized: bool,
-    n_solutions: usize,
+    pub first_sol_found: bool,
+    pub n_solutions: usize,
 }
 
 impl Solver {
     /// The randomization is based on 32 bit xorshift, so seed must be 32 bit
-    pub fn solve(
-        n: u32,
-        n_to_remove_proportion: f32,
-        seed: usize,
-    ) -> (Vec<usize>, Vec<usize>, u32) {
+    pub fn generate(n: u32, remove_prop: f32, seed: usize) -> (Vec<usize>, Vec<usize>, u32) {
+        // Create final solution
         let mut s = Self::init_matrix(n); // n MUST be a square number, crashes otherwise...
-        let orig_matrix = s.matrix.clone();
+        s.blank_matrix = s.matrix.clone();
         s.rng_state = if seed == 0 { 1 } else { seed as u32 };
         s.find_solution_branch();
-        s.initialized = true;
+        s.first_sol_found = true;
 
-        let n_removed = s.remove_cells(n_to_remove_proportion, orig_matrix);
-
+        // Punch holes in it
+        let n_removed = s.remove_cells(remove_prop);
         return (s.solution, s.removed, n_removed);
     }
 
-    fn init_matrix(n: u32) -> Self {
+    pub fn init_matrix(n: u32) -> Self {
         let mut matrix = Vec::with_capacity(((n.pow(3) + 1) * 4) as usize);
         let n2 = n.pow(2);
         let root_idx = 4 * n2;
@@ -125,6 +126,7 @@ impl Solver {
 
         let solution: Vec<usize> = Vec::with_capacity(n2 as usize);
         Solver {
+            blank_matrix: matrix.clone(),
             matrix,
 
             solution: solution.clone(),
@@ -133,13 +135,13 @@ impl Solver {
             root: root_idx as usize,
             n,
             rng_state: 0,
-            initialized: false,
+            first_sol_found: false,
             n_solutions: 0,
         }
     }
 
     /// Recursively search for solution. Returning false = fail on this recursive branch, true = matrix solved, short circuiting
-    fn find_solution_branch(&mut self) -> bool {
+    pub fn find_solution_branch(&mut self) -> bool {
         let root = self.root;
         if self.matrix[root].right == root as u32 {
             self.n_solutions += 1;
@@ -197,7 +199,7 @@ impl Solver {
             self.cover_solution(row);
 
             // Continue recursion
-            if self.find_solution_branch() && !self.initialized {
+            if self.find_solution_branch() && !self.first_sol_found {
                 return true;
             }
 
@@ -220,7 +222,7 @@ impl Solver {
         return self.n_solutions == 1;
     }
 
-    fn remove_cells(&mut self, n_to_remove_proportion: f32, orig_matrix: Vec<Node>) -> u32 {
+    pub fn remove_cells(&mut self, n_to_remove_proportion: f32) -> u32 {
         let mut n_removed = 0;
         let mut to_remove = self.solution.clone();
 
@@ -230,7 +232,7 @@ impl Solver {
             cell_removed = false;
             let mut next: Vec<usize> = Vec::new();
             for cell_to_be_removed in &to_remove {
-                self.matrix = orig_matrix.clone();
+                self.matrix = self.blank_matrix.clone();
                 for cell in self.solution.clone() {
                     if cell != *cell_to_be_removed && !self.removed.contains(&cell) {
                         self.cover_col_and_rows(self.matrix[cell].column_obj as usize);
@@ -262,7 +264,6 @@ impl Solver {
 impl Solver {
     fn cover_solution(&mut self, row: usize) {
         let mut row_subitem: usize = self.matrix[row].right as usize;
-        // Cover cols that this row satisfies, and eliminate some overlapping rows / answers
         while row_subitem != row {
             let j_col = self.matrix[row_subitem].column_obj as usize;
             self.cover_col_and_rows(j_col);
@@ -367,5 +368,15 @@ impl Solver {
         rng ^= rng << 5;
         self.rng_state = rng;
         return rng;
+    }
+
+    pub fn insert_sol_row(&mut self, row: usize) {
+        self.solution.push(row);
+        self.cover_col_and_rows(self.matrix[row].column_obj as usize);
+        self.cover_solution(row);
+    }
+
+    pub fn get_sol(self) -> Vec<usize> {
+        return self.solution;
     }
 }
