@@ -82,13 +82,9 @@ impl Solver {
         if self.board[row][col] != 0 {
             return 0;
         }
-        let mut count = 0;
-        for num in 1..=self.n {
-            if self.valid_place(row, col, num as u8){
-                count += 1;
-            }
-        }
-        count
+        let used = self.row_used[row] | self.col_used[col] | self.box_used[self.getBoxIndex(row, col)];
+        let mask = if self.n == 64 { !0u64 } else { (1u64 << self.n) - 1 };
+        (!used & mask).count_ones() as usize
     }
     // Finds the next empty cell with the fewest valid placements using minimum remaining values(MRV) heuristic.
     // https://inst.eecs.berkeley.edu/~cs188/textbook/csp/ordering.html
@@ -107,7 +103,7 @@ impl Solver {
                         best_row = r;
                         best_col = c;
                         found = true;
-                        if count == 0 {
+                        if count <= 1 {
                             return (true, best_row, best_col);
                         }
                     }
@@ -115,34 +111,6 @@ impl Solver {
             }
         }
         (found, best_row, best_col)
-    }
-    /*Fills cells with only one valid placement until no more such cells exist.
-    Returns true if successful, false if a no path is found. This approach is outlined here
-    https://norvig.com/sudoku.html */
-    fn fill_cell(&mut self) -> bool {
-        let mut change = true;
-        while change {
-            change = false;
-            for r in 0..self.n {
-                for c in 0..self.n{
-                    if self.board[r][c] == 0 {
-                        let count = self.count_paths(r,c);
-                        if count == 1{
-                            for num in 1..=self.n {
-                                if self.valid_place(r, c, num as u8){
-                                    self.place(r, c, num as u8);
-                                    break;
-                                }
-                            }
-                            change = true;
-                        }else if count == 0 {
-                            return false;
-                        }
-                    }
-                }
-            }
-        }
-        true
     }
 
     pub fn solve(&mut self) -> bool {
@@ -164,10 +132,6 @@ impl Solver {
         for num in 1..=self.n{
             if self.valid_place(row, col, num as u8){
                 self.place(row, col, num as u8);
-                if !self.fill_cell() {
-                    self.remove(row, col, num as u8);
-                    continue;
-                }
                 if self.backtrack(){
                     return true;
                 }
