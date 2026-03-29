@@ -1,5 +1,5 @@
-import init, { generate_sudoku, solve_sudoku} from '../DLX/big_sudoku.js';
-import initBrute, {solve} from '../BruteForce/brute_force_big_sudoku.js';
+import init, { generate_sudoku, solve_sudoku} from './wasm/big_sudoku.js';
+import initBrute, {solve} from './wasm/brute_force_big_sudoku.js';
 await init();
 await initBrute();
 
