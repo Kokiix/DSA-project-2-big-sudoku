@@ -1,61 +1,22 @@
-/* @ts-self-types="./big_sudoku.d.ts" */
-
-export class FinalSudokuBoard {
-    static __wrap(ptr) {
-        ptr = ptr >>> 0;
-        const obj = Object.create(FinalSudokuBoard.prototype);
-        obj.__wbg_ptr = ptr;
-        FinalSudokuBoardFinalization.register(obj, obj.__wbg_ptr, obj);
-        return obj;
-    }
-    __destroy_into_raw() {
-        const ptr = this.__wbg_ptr;
-        this.__wbg_ptr = 0;
-        FinalSudokuBoardFinalization.unregister(this);
-        return ptr;
-    }
-    free() {
-        const ptr = this.__destroy_into_raw();
-        wasm.__wbg_finalsudokuboard_free(ptr, 0);
-    }
-    /**
-     * @returns {Uint32Array}
-     */
-    get init_grid() {
-        const ret = wasm.finalsudokuboard_init_grid(this.__wbg_ptr);
-        var v1 = getArrayU32FromWasm0(ret[0], ret[1]).slice();
-        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
-        return v1;
-    }
-    /**
-     * @returns {Uint32Array}
-     */
-    get solution() {
-        const ret = wasm.finalsudokuboard_solution(this.__wbg_ptr);
-        var v1 = getArrayU32FromWasm0(ret[0], ret[1]).slice();
-        wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
-        return v1;
-    }
-}
-if (Symbol.dispose) FinalSudokuBoard.prototype[Symbol.dispose] = FinalSudokuBoard.prototype.free;
+/* @ts-self-types="./brute_force_big_sudoku.d.ts" */
 
 /**
- * @param {number} n
- * @param {number} n_empty
- * @param {number} seed
- * @returns {FinalSudokuBoard | undefined}
+ * @param {number} size
+ * @param {Uint8Array} board_1d
+ * @returns {Uint8Array}
  */
-export function generate_sudoku(n, n_empty, seed) {
-    const ret = wasm.generate_sudoku(n, n_empty, seed);
-    return ret === 0 ? undefined : FinalSudokuBoard.__wrap(ret);
+export function solve(size, board_1d) {
+    const ptr0 = passArray8ToWasm0(board_1d, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.solve(size, ptr0, len0);
+    var v2 = getArrayU8FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 1, 1);
+    return v2;
 }
 
 function __wbg_get_imports() {
     const import0 = {
         __proto__: null,
-        __wbg___wbindgen_throw_6ddd609b62940d55: function(arg0, arg1) {
-            throw new Error(getStringFromWasm0(arg0, arg1));
-        },
         __wbindgen_init_externref_table: function() {
             const table = wasm.__wbindgen_externrefs;
             const offset = table.grow(4);
@@ -68,30 +29,13 @@ function __wbg_get_imports() {
     };
     return {
         __proto__: null,
-        "./big_sudoku_bg.js": import0,
+        "./brute_force_big_sudoku_bg.js": import0,
     };
 }
 
-const FinalSudokuBoardFinalization = (typeof FinalizationRegistry === 'undefined')
-    ? { register: () => {}, unregister: () => {} }
-    : new FinalizationRegistry(ptr => wasm.__wbg_finalsudokuboard_free(ptr >>> 0, 1));
-
-function getArrayU32FromWasm0(ptr, len) {
+function getArrayU8FromWasm0(ptr, len) {
     ptr = ptr >>> 0;
-    return getUint32ArrayMemory0().subarray(ptr / 4, ptr / 4 + len);
-}
-
-function getStringFromWasm0(ptr, len) {
-    ptr = ptr >>> 0;
-    return decodeText(ptr, len);
-}
-
-let cachedUint32ArrayMemory0 = null;
-function getUint32ArrayMemory0() {
-    if (cachedUint32ArrayMemory0 === null || cachedUint32ArrayMemory0.byteLength === 0) {
-        cachedUint32ArrayMemory0 = new Uint32Array(wasm.memory.buffer);
-    }
-    return cachedUint32ArrayMemory0;
+    return getUint8ArrayMemory0().subarray(ptr / 1, ptr / 1 + len);
 }
 
 let cachedUint8ArrayMemory0 = null;
@@ -102,25 +46,19 @@ function getUint8ArrayMemory0() {
     return cachedUint8ArrayMemory0;
 }
 
-let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
-cachedTextDecoder.decode();
-const MAX_SAFARI_DECODE_BYTES = 2146435072;
-let numBytesDecoded = 0;
-function decodeText(ptr, len) {
-    numBytesDecoded += len;
-    if (numBytesDecoded >= MAX_SAFARI_DECODE_BYTES) {
-        cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
-        cachedTextDecoder.decode();
-        numBytesDecoded = len;
-    }
-    return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
+function passArray8ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 1, 1) >>> 0;
+    getUint8ArrayMemory0().set(arg, ptr / 1);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
 }
+
+let WASM_VECTOR_LEN = 0;
 
 let wasmModule, wasm;
 function __wbg_finalize_init(instance, module) {
     wasm = instance.exports;
     wasmModule = module;
-    cachedUint32ArrayMemory0 = null;
     cachedUint8ArrayMemory0 = null;
     wasm.__wbindgen_start();
     return wasm;
@@ -194,7 +132,7 @@ async function __wbg_init(module_or_path) {
     }
 
     if (module_or_path === undefined) {
-        module_or_path = new URL('big_sudoku_bg.wasm', import.meta.url);
+        module_or_path = new URL('brute_force_big_sudoku_bg.wasm', import.meta.url);
     }
     const imports = __wbg_get_imports();
 

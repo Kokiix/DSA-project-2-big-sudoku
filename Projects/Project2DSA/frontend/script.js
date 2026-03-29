@@ -1,18 +1,12 @@
-import init, { generate_sudoku } from '../backend/DLX/big_sudoku.js';
+import init, { generate_sudoku, solve_sudoku} from '../DLX/big_sudoku.js';
+import initBrute, {solve} from '../BruteForce/brute_force_big_sudoku.js';
 await init();
+await initBrute();
 
 let currentBoard = null;
 let currentSize = 0;
 
 let isSolved = false;
-
-let startDLX = 0;
-let endDLX = 0;
-let elaspedTimeDLX = 0;
-
-let startBrute = 0;
-let endBrute = 0;
-let elaspedTimeBrute = 0;
 
 const runDlxBtn = document.getElementById('runDlxBtn');
 const runBruteBtn = document.getElementById('runBruteBtn');
@@ -46,14 +40,13 @@ generateBtn.addEventListener('click', () =>{
     const seed = Math.floor(Math.random() * 1000000);
 
    // https://developer.mozilla.org/en-US/docs/Web/API/Performance/now
-    startDLX = performance.now();
+    
     currentBoard = generate_sudoku(size, missingPercent/100, seed);
-    endDLX = performance.now();
-
-    elaspedTimeDLX = endDLX - startDLX;
     currentSize = size;
 
     generateBoard(currentSize, currentBoard.init_grid);
+    console.log('init_grid:', currentBoard.init_grid);  // add this
+    console.log('solution:', currentBoard.solution); 
     runControls.classList.remove('hidden');
 })
 
@@ -61,20 +54,32 @@ generateBtn.addEventListener('click', () =>{
  //DLX button
  //Runs DLX algorithm on puzzle in output box
 runDlxBtn.addEventListener('click', () => {
-    const size = parseInt(sizeSelect.value);
-    countLbl.textContent = 'Ran for ' + elaspedTimeDLX; 
-    generateBoard(currentSize, currentBoard.solution);
+    const start = performance.now();
+    const solution = solve_sudoku(currentSize, currentBoard.init_grid);
+    const end = performance.now();
+    
+    generateBoard(currentSize, solution);
     isSolved = true;
+
+    const elaspedTime = end - start;
+    countLbl.textContent = 'Ran for ' + elaspedTime + ' milliseconds';
     resetBtn.textContent= "Go Back";
 });
 
 //Brute Force button
 //Runs brute force algorithm on puzzle in output box
 runBruteBtn.addEventListener('click', () => {
-    const size = parseInt(sizeSelect.value);
-    countLbl.textContent = 'Ran for ';
+    //Brute force algo uses Uint8 while DLX uses Uint32so conversion is required
+    const board = new Uint8Array(currentBoard.init_grid);
 
+    const start = performance.now();
+    const solution = solve(currentSize, board);
+    const end = performance.now();
+
+    generateBoard(currentSize, solution);
     isSolved = true;
+    const elaspedTime = end - start;
+    countLbl.textContent = 'Ran for ' + elaspedTime + ' milliseconds';
     resetBtn.textContent= "Go Back";
 });
 
@@ -97,6 +102,7 @@ resetBtn.addEventListener('click', () => {
     runControls.classList.add('hidden');
     output.classList.remove('expanded');
     expandBtn.textContent = 'Expand All';
+    currentBoard = null;
 }
 });
 
