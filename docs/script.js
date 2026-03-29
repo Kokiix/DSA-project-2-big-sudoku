@@ -13,7 +13,6 @@ const runBruteBtn = document.getElementById('runBruteBtn');
 const resetBtn = document.getElementById('resetBtn');
 const output = document.getElementById('output');
 const countLbl = document.getElementById('countLbl');
-const expandBtn = document.getElementById('expandBtn');
 const sizeSelect = document.getElementById('sizeSelect');
 const userPercentage = document.getElementById('userPercentage');
 const generateBtn = document.getElementById('generateBtn');
@@ -33,7 +32,9 @@ generateBtn.addEventListener('click', () =>{
 
     const missingPercent = parseFloat(userPercentage.value);
 
-    if (isNaN(missingPercent)) {
+    let num = Number(missingPercent);
+
+    if (isNaN(missingPercent)|| !Number.isInteger(num)) {
         return;
     }
 
@@ -100,34 +101,41 @@ resetBtn.addEventListener('click', () => {
     sizeSelect.value = '0';
     userPercentage.value = '';
     runControls.classList.add('hidden');
-    output.classList.remove('expanded');
-    expandBtn.textContent = 'Expand All';
     currentBoard = null;
 }
 });
 
-//Expand button
-//Expands/Minimizes the output box
-expandBtn.addEventListener('click', ()=> {
-    output.classList.toggle('expanded');
-    if(output.classList.contains('expanded')){
-        expandBtn.textContent = 'Collapse';
-    } else{
-        expandBtn.textContent = 'Expand All';
-    }
-
-});
-
 function generateBoard(size, cells) {
+    //Dynamic font sizing
+    //https://stackoverflow.com/questions/14431411/pure-css-to-make-font-size-responsive-based-on-dynamic-amount-of-characters
+
     output.style.display = 'grid';
     output.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
     output.style.padding = '0';
     output.innerHTML = '';
 
-    cells.forEach(value => {
+    const subgridSize = Math.sqrt(size);
+
+    cells.forEach((value,index) =>{
+        const row = Math.floor(index / size);
+        const col = index % size; 
         const cell = document.createElement('div');
+        const cellSize = output.clientWidth / size;      
+        const fontSize = Math.max(8, cellSize * 0.5); 
         cell.classList.add('grid-cell');
+        cell.style.fontSize = `${fontSize}px`;  
         cell.textContent = value === 0 ? '' : value;
+
+        // adds thick border on the right edge of each subgrid column
+        if ((col + 1) % subgridSize === 0 && col + 1 !== size) {
+            cell.classList.add('thick-right');
+        }
+
+        // adds thick border on the bottom edge of each subgrid row
+        if ((row + 1) % subgridSize === 0 && row + 1 !== size) {
+            cell.classList.add('thick-bottom');
+        }
+
         output.appendChild(cell);
     });
 }
