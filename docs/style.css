@@ -145,34 +145,12 @@ input[type="text"]::placeholder{
     color: white;
 }
 
-
-/*  Expand button   */
-.expand_bar{
-    width: 100%;
-    display: flex;
-    justify-content: flex-start;
-}
-
-#expandBtn {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-family: var(--font-display);
-    font-size: 0.85rem;
-    padding: 0;
-}
-
-#expandBtn:hover {
-    text-decoration: underline; 
-    color: var(--text);
-}
-
 /* Output box */
 .output-box{
     width: 100%;
     min-height: 200px;
-    max-height: 300px;
-    overflow: hidden;
+    max-height: 2000px;     
+    overflow: auto;    
     background-color: var(--surface);
     border: 1px solid var(--border);
     border-radius: 10px;
@@ -210,8 +188,14 @@ input[type="text"]::placeholder{
     align-items: center;
     justify-content: center;
     border: 1px solid var(--text-muted); 
-    font-size: 0.75rem;
     color: var(--text);
+}
+.grid-cell.thick-right {
+    border-right: 3px solid var(--text);
+}
+
+.grid-cell.thick-bottom {
+    border-bottom: 3px solid var(--text);
 }
 
 .hidden{
