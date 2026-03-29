@@ -18,4 +18,8 @@ In `dlx-solver/src/tests.rs`, you can modify:
   - RNG seed
 
 ### Brute force Generator
-{instructions here}
+```
+cd BruteForce
+cargo run
+```
+In `main.rs`, you can modify the test cases.
