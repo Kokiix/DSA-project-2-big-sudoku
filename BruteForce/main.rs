@@ -14,7 +14,10 @@ pub fn solve(n: usize, board_1d: Vec<u8>) -> Vec<u8> {
         .collect::<Vec<Vec<u8>>>();
 
     let mut puzzle = Sudoku::new(n);
-    board_1d
+    puzzle.board = board_2d;
+    let mut solver = Solver::new(puzzle);
+    solver.solve();
+    return solver.board.into_iter().flatten().collect();
 }
 
 // Chase's stuff
