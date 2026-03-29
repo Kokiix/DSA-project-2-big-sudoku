@@ -3,10 +3,19 @@ mod sudoku;
 
 use brute_force::Solver;
 use sudoku::Sudoku;
+use wasm_bindgen::prelude::wasm_bindgen;
 
 // Kenneth insert (for the 2nd time because I accidentally deleted it :D)
 #[wasm_bindgen]
-pub fn solve() {}
+pub fn solve(n: usize, board_1d: Vec<u8>) -> Vec<u8> {
+    let board_2d = board_1d
+        .chunks(n)
+        .map(|x| Vec::from(x))
+        .collect::<Vec<Vec<u8>>>();
+
+    let mut puzzle = Sudoku::new(n);
+    board_1d
+}
 
 // Chase's stuff
 fn main() {
