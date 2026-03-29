@@ -39,15 +39,70 @@ export class FinalSudokuBoard {
 }
 if (Symbol.dispose) FinalSudokuBoard.prototype[Symbol.dispose] = FinalSudokuBoard.prototype.free;
 
+export class Solver {
+    __destroy_into_raw() {
+        const ptr = this.__wbg_ptr;
+        this.__wbg_ptr = 0;
+        SolverFinalization.unregister(this);
+        return ptr;
+    }
+    free() {
+        const ptr = this.__destroy_into_raw();
+        wasm.__wbg_solver_free(ptr, 0);
+    }
+    /**
+     * @returns {boolean}
+     */
+    get first_sol_found() {
+        const ret = wasm.__wbg_get_solver_first_sol_found(this.__wbg_ptr);
+        return ret !== 0;
+    }
+    /**
+     * @returns {number}
+     */
+    get n_solutions() {
+        const ret = wasm.__wbg_get_solver_n_solutions(this.__wbg_ptr);
+        return ret >>> 0;
+    }
+    /**
+     * @param {boolean} arg0
+     */
+    set first_sol_found(arg0) {
+        wasm.__wbg_set_solver_first_sol_found(this.__wbg_ptr, arg0);
+    }
+    /**
+     * @param {number} arg0
+     */
+    set n_solutions(arg0) {
+        wasm.__wbg_set_solver_n_solutions(this.__wbg_ptr, arg0);
+    }
+}
+if (Symbol.dispose) Solver.prototype[Symbol.dispose] = Solver.prototype.free;
+
+/**
+ * n must be a square number
+ * @param {number} n
+ * @param {number} proportion_empty
+ * @param {number} seed
+ * @returns {FinalSudokuBoard}
+ */
+export function generate_sudoku(n, proportion_empty, seed) {
+    const ret = wasm.generate_sudoku(n, proportion_empty, seed);
+    return FinalSudokuBoard.__wrap(ret);
+}
+
 /**
  * @param {number} n
- * @param {number} n_empty
- * @param {number} seed
- * @returns {FinalSudokuBoard | undefined}
+ * @param {Uint32Array} in_board
+ * @returns {Uint32Array}
  */
-export function generate_sudoku(n, n_empty, seed) {
-    const ret = wasm.generate_sudoku(n, n_empty, seed);
-    return ret === 0 ? undefined : FinalSudokuBoard.__wrap(ret);
+export function solve_sudoku(n, in_board) {
+    const ptr0 = passArray32ToWasm0(in_board, wasm.__wbindgen_malloc);
+    const len0 = WASM_VECTOR_LEN;
+    const ret = wasm.solve_sudoku(n, ptr0, len0);
+    var v2 = getArrayU32FromWasm0(ret[0], ret[1]).slice();
+    wasm.__wbindgen_free(ret[0], ret[1] * 4, 4);
+    return v2;
 }
 
 function __wbg_get_imports() {
@@ -75,6 +130,9 @@ function __wbg_get_imports() {
 const FinalSudokuBoardFinalization = (typeof FinalizationRegistry === 'undefined')
     ? { register: () => {}, unregister: () => {} }
     : new FinalizationRegistry(ptr => wasm.__wbg_finalsudokuboard_free(ptr >>> 0, 1));
+const SolverFinalization = (typeof FinalizationRegistry === 'undefined')
+    ? { register: () => {}, unregister: () => {} }
+    : new FinalizationRegistry(ptr => wasm.__wbg_solver_free(ptr >>> 0, 1));
 
 function getArrayU32FromWasm0(ptr, len) {
     ptr = ptr >>> 0;
@@ -102,6 +160,13 @@ function getUint8ArrayMemory0() {
     return cachedUint8ArrayMemory0;
 }
 
+function passArray32ToWasm0(arg, malloc) {
+    const ptr = malloc(arg.length * 4, 4) >>> 0;
+    getUint32ArrayMemory0().set(arg, ptr / 4);
+    WASM_VECTOR_LEN = arg.length;
+    return ptr;
+}
+
 let cachedTextDecoder = new TextDecoder('utf-8', { ignoreBOM: true, fatal: true });
 cachedTextDecoder.decode();
 const MAX_SAFARI_DECODE_BYTES = 2146435072;
@@ -115,6 +180,8 @@ function decodeText(ptr, len) {
     }
     return cachedTextDecoder.decode(getUint8ArrayMemory0().subarray(ptr, ptr + len));
 }
+
+let WASM_VECTOR_LEN = 0;
 
 let wasmModule, wasm;
 function __wbg_finalize_init(instance, module) {
