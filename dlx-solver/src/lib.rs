@@ -34,12 +34,9 @@ pub fn generate_sudoku(n: u32, proportion_empty: f32, seed: usize) -> FinalSudok
     let n2 = n.pow(2) as usize;
 
     // Translate row # into position + value
-    let solution = matrix_sol_into_sudoku_board(sol, n2);
-    let init_grid = solution
-        .clone()
-        .iter()
-        .map(|val| if removed.contains(val) { 0usize } else { *val })
-        .collect();
+    let solution = matrix_sol_into_sudoku_board(sol.clone(), n2);
+    let init_rows = sol.into_iter().filter(|r| !removed.contains(r)).collect();
+    let init_grid = matrix_sol_into_sudoku_board(init_rows, n2);
 
     FinalSudokuBoard {
         init_grid,

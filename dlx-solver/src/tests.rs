@@ -4,7 +4,7 @@ use crate::{generate_sudoku, solve_sudoku};
 fn print_solved() {
     // Parameters
     // ========================================================
-    let size: usize = 36;
+    let size: usize = 9;
     let remove_proportion = 0.1;
     let seed = 1;
     // ========================================================
@@ -19,5 +19,7 @@ fn print_solved() {
     }
 
     let sol_attempt = solve_sudoku(size as u32, init);
+    println!("Sol solution: {:?}", sol.solution);
+    println!("Sol attempt:  {:?}", sol_attempt);
     assert!(sol_attempt == sol.solution);
 }
