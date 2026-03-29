@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Big Sudoku Solver</title>
+    <!-- Google fonts: https://developers.google.com/fonts/docs/getting_started -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+
+
+<!-- https://www.w3schools.com/html/html_classes.asp -->
+<!-- https://www.w3schools.com/tags/tag_button.asp -->
+<!-- https://www.w3schools.com/tags/default.asp -->
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- Header -->
+    <header>
+        <h1 class="title">Really Big Sudoku Generator</h1>
+        <p class="subtitle">Solving Sudoku with the Dancing Links Algorithm (DLX)</p>
+    </header>
+
+    <!-- Size Selector -->
+    <section class ="controls">
+        <label class = "select-label" for = "sizeSelect">Sudoku Size</label>
+        <select id = "sizeSelect">
+            <option value="0" selected>None</option>
+            <option value="4">4 x 4</option>
+            <option value="9">9 x 9</option>
+            <option value="16">16 x 16</option>
+            <option value="25">25 x 25</option>
+            <option value="36">36 x 36</option>
+            <!-- <option value="49">49 x 49</option>
+            <option value="64">64 x 64</option>
+            <option value="81">81 x 81</option>
+            <option value="100">100 x 100</option>
+            <option value="121">121 x 121</option>
+            <option value="144">144 x 144</option>
+            <option value="169">169 x 169</option> -->
+        </select>
+        <label class="select-label" for="userPercentage">% of Puzzle Unsolved</label>
+        <input type= "text" id= "userPercentage" placeholder="Enter percentage">
+        <button class = "btn btn-primary" id="generateBtn"> Generate</button>  
+    </section>
+
+    <!-- Control Buttons -->
+    <section class="hidden controls" id="runControls">
+        <button class="btn btn-primary" id="runDlxBtn">Run DLX</button>
+        <button class="btn btn-primary" id="runBruteBtn">Run Brute Force</button>
+        <button class="btn btn-secondary" id="resetBtn">Reset</button>
+    </section>
+
+    <!-- Count Label -->
+    <label id="countLbl"></label>
+    
+
+    <!-- Expand Bar -->
+    <section class = "expand_bar">
+        <button class="btn btn-secondary" id ="expandBtn">Expand All</button>
+    </section>
+   
+    <!-- Output Display -->
+
+    <section class="output-box" id ="output">
+    </section>
+
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
