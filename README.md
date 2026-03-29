@@ -1,5 +1,6 @@
 # Big Sudoku
-{description here}
+{screenshot of web page}
+[Report PDF](https://docs.google.com/document/d/1vPIDAzfMHhhrVGL4wX_caqKn1JOvpVRGLhHrqRAdBcQ/edit?usp=sharing)
 
   
 ## Running the 2 Algorithms Separately
@@ -8,8 +9,10 @@
 cd dlx-solver
 cargo test --release -- --nocapture
 ```
-
-Change the Sudoku grid size, fill %, and seed, in `dlx-solver/src/tests.rs`
+In `dlx-solver/src/tests.rs`, you can modify: 
+  - grid size
+  - % of cells to remove
+  - RNG seed
 
 ### Brute force Generator
 {instructions here}
